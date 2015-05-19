@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">coSense</string>
+
+    <string name="ip_label">IP ADDRESS:</string>
+    <string name="server_label">CoAP Server</string>
+    <string name="sensors_label">Web Service Settings</string>
+
+    <!--Sensor Labels-->
+    <string name="gps_label">Location</string>
+    <string name="lat_label">Latitude</string>
+    <string name="long_label">Longitude</string>
+    <string name="noise_label">Ambient Noise</string>
+    <string name="noise_unit">Generic Unit</string>
+    <string name="noise_meter_label">0 – 32.768</string>
+    <string name="light_label">Ambient Light</string>
+    <string name="light_unit">Lux</string>
+    <string name="light_meter_label">0 – 200.000 (log scale)</string>
+    <string name="pressure_label">Ambient Pressure</string>
+    <string name="pressure_unit">hPa</string>
+    <string name="pressure_meter_label">950 – 1050</string>
+
+
+    <!--Button Labels-->
+    <string name="server_on">Server ON</string>
+    <string name="server_off">Server OFF</string>
+
+    <string name="on">ON</string>
+    <string name="off">OFF</string>
+
+    <string name="action_settings">Settings</string>
+</resources>
