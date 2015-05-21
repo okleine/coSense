@@ -279,20 +279,26 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
         else if(group.getId() == R.id.radgroup_light){
             if(checkedId == R.id.rad_light_on){
 
-                //create light sensor listener and register at sensor manager
-                this.lightSensorListener = new LightSensorEventListener();
+                //Check if there is a light sensor available
                 Sensor lightSensor = this.sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-                this.sensorManager.registerListener(this.lightSensorListener, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
-
-                //Create Light Web Service
-                if(this.serverApplication != null) {
-                    LightSensorValue initialStatus = new LightSensorValue(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
-                    this.lightSensorService = new LightSensorService("/light", initialStatus, serverApplication.getExecutor());
-                    this.serverApplication.registerService(this.lightSensorService);
-                }
-                else{
+                if(lightSensor == null){
                     this.radLightOff.setChecked(true);
-                    Toast.makeText(this, "Server is not running!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "No light sensor available!", Toast.LENGTH_LONG).show();
+                }
+                else {
+                    //create light sensor listener and register at sensor manager
+                    this.lightSensorListener = new LightSensorEventListener();
+                    this.sensorManager.registerListener(this.lightSensorListener, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
+
+                    //Create Light Web Service
+                    if (this.serverApplication != null) {
+                        LightSensorValue initialStatus = new LightSensorValue(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
+                        this.lightSensorService = new LightSensorService("/light", initialStatus, serverApplication.getExecutor());
+                        this.serverApplication.registerService(this.lightSensorService);
+                    } else {
+                        this.radLightOff.setChecked(true);
+                        Toast.makeText(this, "Server is not running!", Toast.LENGTH_LONG).show();
+                    }
                 }
             }
             else{
@@ -309,19 +315,26 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
         //Pressure
         else if(group.getId() == R.id.radgroup_pressure){
             if(checkedId == R.id.rad_pressure_on){
-                this.pressureSensorListener = new PressureSensorEventListener();
-                Sensor pressureSensor = this.sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
-                this.sensorManager.registerListener(this.pressureSensorListener, pressureSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
-                //Create Pressure Web Service
-                if(this.serverApplication != null) {
-                    PressureSensorValue initialStatus = new PressureSensorValue(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
-                    this.pressureSensorService = new PressureSensorService("/pressure", initialStatus, serverApplication.getExecutor());
-                    this.serverApplication.registerService(this.pressureSensorService);
-                }
-                else{
+                Sensor pressureSensor = this.sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
+
+                if(pressureSensor == null){
                     this.radPressureOff.setChecked(true);
-                    Toast.makeText(this, "Server is not running!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "No pressure sensor available!", Toast.LENGTH_LONG).show();
+                }
+                else {
+                    this.pressureSensorListener = new PressureSensorEventListener();
+                    this.sensorManager.registerListener(this.pressureSensorListener, pressureSensor, SensorManager.SENSOR_DELAY_NORMAL);
+
+                    //Create Pressure Web Service
+                    if (this.serverApplication != null) {
+                        PressureSensorValue initialStatus = new PressureSensorValue(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
+                        this.pressureSensorService = new PressureSensorService("/pressure", initialStatus, serverApplication.getExecutor());
+                        this.serverApplication.registerService(this.pressureSensorService);
+                    } else {
+                        this.radPressureOff.setChecked(true);
+                        Toast.makeText(this, "Server is not running!", Toast.LENGTH_LONG).show();
+                    }
                 }
             }
             else{
