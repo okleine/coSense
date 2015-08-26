@@ -40,14 +40,16 @@
                     android:id="@+id/rad_server_on"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/on"/>
+                    android:text="@string/on"
+                    android:checked="false"/>
 
                 <RadioButton
                     android:id="@+id/rad_server_off"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/off"
-                    android:checked="true"/>
+                    android:checked="true"
+                    />
             </RadioGroup>
         </RelativeLayout>
 
@@ -68,7 +70,7 @@
             <TextView
                 android:id="@+id/ip_txt"
                 android:layout_width="0dp"
-                android:layout_weight="1"
+                android:layout_weight=".5"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:singleLine="true"
@@ -78,8 +80,37 @@
                 android:focusableInTouchMode="false"
                 />
 
+            <TextView
+                android:id="@+id/ssp_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginRight="5dp"
+                android:text="@string/ssp_label"
+                android:layout_marginLeft="5dp"
+                />
 
+            <TextView
+                android:id="@+id/ssp_txt"
+                android:layout_width="0dp"
+                android:layout_weight=".5"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:singleLine="true"
+                android:background="@null"
+                android:clickable="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                />
         </LinearLayout>
+
+        <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!-->-->
+
+            <!-- -->
+        <!--</LinearLayout>-->
 
     </LinearLayout>
 
@@ -166,7 +197,8 @@
                                 android:id="@+id/rad_gps_on"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/on"/>
+                                android:text="@string/on"
+                               />
 
                             <RadioButton
                                 android:id="@+id/rad_gps_off"
@@ -523,7 +555,8 @@
                             android:id="@+id/rad_noise_on"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/on"/>
+                            android:text="@string/on"
+                            />
 
                         <RadioButton
                             android:id="@+id/rad_noise_off"
@@ -598,7 +631,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                style="@android:style/Widget.ProgressBar.Horizontal"/>
+                                style="@android:style/Widget.ProgressBar.Horizontal" />
 
                         </LinearLayout>
                     </LinearLayout>

@@ -17,6 +17,7 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -29,11 +30,15 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import de.uniluebeck.itm.ncoap.application.server.CoapServerApplication;
 import de.uniluebeck.itm.ncoap.communication.dispatching.server.NotFoundHandler;
 
 
-public class MainActivity extends Activity implements RadioGroup.OnCheckedChangeListener{
+public class MainActivity extends Activity implements RadioGroup.OnCheckedChangeListener,
+        SettingsDialog.SettingsDialogListener, StartRegistrationDialog.Listener{
 
     private Handler handler = new Handler();
 
@@ -49,6 +54,7 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
     private SensorManager sensorManager;
     private LightSensorEventListener lightSensorListener;
     private PressureSensorEventListener pressureSensorListener;
+
     //GPS
     private LocationManager locationManager;
     private LocationListener locationListener;
@@ -58,10 +64,11 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
     //View Elements
     private RadioGroup radGroupServer;
     private TextView txtIP;
+    private TextView txtProxy;
 
     private RadioGroup radGroupLocation;
     private RadioButton radLocationOff;
-    private EditText txtLattitude;
+    private EditText txtLatitude;
     private EditText txtLongitude;
 
     private RadioGroup radGroupNoise;
@@ -86,6 +93,8 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
     private NoiseSensorService noiseSensorService;
     private PressureSensorService pressureSensorService;
 
+    private SettingsDialog settingsDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,10 +103,11 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
         //set view elements
         this.radGroupServer = (RadioGroup) findViewById(R.id.radgroup_server);
         this.txtIP = (TextView) findViewById(R.id.ip_txt);
+        this.txtProxy = (TextView) findViewById(R.id.ssp_txt);
 
         this.radGroupLocation = (RadioGroup) findViewById(R.id.radgroup_gps);
         this.radLocationOff = (RadioButton) findViewById(R.id.rad_gps_off);
-        this.txtLattitude = (EditText) findViewById(R.id.lat_txt);
+        this.txtLatitude = (EditText) findViewById(R.id.lat_txt);
         this.txtLongitude = (EditText) findViewById(R.id.long_txt);
 
         this.radGroupNoise = (RadioGroup) findViewById(R.id.radgroup_noise);
@@ -120,6 +130,8 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
 
         this.networkStateReceiver = new NetworkStateReceiver(this);
         registerReceiver(networkStateReceiver, new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
+
+        this.settingsDialog = null;
     }
 
     @Override
@@ -150,7 +162,6 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
 
         //Register for RadioGroup "Light"
         this.radGroupPressure.setOnCheckedChangeListener(this);
-
     }
 
 
@@ -170,12 +181,22 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.ssp_settings) {
+            if(this.settingsDialog == null){
+                this.settingsDialog = new SettingsDialog();
+            }
+
+            this.settingsDialog.show(getFragmentManager(), null);
             return true;
+        }
+
+        if(id == R.id.ssp_registration){
+            new StartRegistrationDialog().show(getFragmentManager(), null);
         }
 
         return super.onOptionsItemSelected(item);
     }
+
 
     @Override
     public void onDestroy(){
@@ -235,7 +256,7 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
             }
             else{
                 this.locationManager.removeUpdates(this.locationListener);
-                this.txtLattitude.setText("");
+                this.txtLatitude.setText("");
                 this.txtLongitude.setText("");
 
                 if(this.locationService != null) {
@@ -278,7 +299,6 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
         //Light
         else if(group.getId() == R.id.radgroup_light){
             if(checkedId == R.id.rad_light_on){
-
                 //Check if there is a light sensor available
                 Sensor lightSensor = this.sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
                 if(lightSensor == null){
@@ -350,6 +370,45 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
         }
     }
 
+    @Override
+    public void onProxyChanged(String sspHost) {
+        new AddressResolutionTask().execute(sspHost);
+    }
+
+
+    @Override
+    public void registerAtProxy() {
+        Toast.makeText(this, "Registration not yet implemented!", Toast.LENGTH_LONG).show();
+    }
+
+    private class AddressResolutionTask extends AsyncTask<String, Void, Void>{
+
+        @Override
+        public Void doInBackground(String... params) {
+            try {
+                final InetAddress sspAddress = InetAddress.getByName(params[0]);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        txtProxy.setText(sspAddress.getHostAddress());
+                    }
+                });
+
+            }
+            catch(final UnknownHostException ex){
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(MainActivity.this, ex.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
+
+            }
+
+            return null;
+        }
+    }
+
     /**
      * Class to sample audio (peak amplitude) from the mic every 200ms
      */
@@ -396,7 +455,7 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
         public void onLocationChanged(Location location) {
             latitude = location.getLatitude();
             longitude = location.getLongitude();
-            txtLattitude.setText("" + location.getLatitude());
+            txtLatitude.setText("" + location.getLatitude());
             txtLongitude.setText("" + location.getLongitude());
 
             if(locationService != null) {
