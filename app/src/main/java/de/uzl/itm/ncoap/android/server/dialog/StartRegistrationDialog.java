@@ -1,4 +1,4 @@
-package de.uzl.itm.ncoap.android.server;
+package de.uzl.itm.ncoap.android.server.dialog;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -49,7 +49,7 @@ public class StartRegistrationDialog extends DialogFragment {
     }
 
 
-    interface Listener {
+    public interface Listener {
         void registerAtProxy();
     }
 }

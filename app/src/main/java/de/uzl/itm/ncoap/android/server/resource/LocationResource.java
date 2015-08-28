@@ -1,20 +1,21 @@
-package de.uzl.itm.ncoap.android.server;
+package de.uzl.itm.ncoap.android.server.resource;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.ScheduledExecutorService;
 
-import de.uniluebeck.itm.ncoap.communication.dispatching.client.Token;
-import de.uniluebeck.itm.ncoap.message.CoapMessage;
-import de.uniluebeck.itm.ncoap.message.options.ContentFormat;
+import de.uzl.itm.ncoap.communication.dispatching.client.Token;
+import de.uzl.itm.ncoap.message.CoapMessage;
+import de.uzl.itm.ncoap.message.options.ContentFormat;
+
 
 /**
  * Created by olli on 17.05.15.
  */
-public class LocationService extends AbstractSensorService<LocationValue> {
+public class LocationResource extends AbstractSensorResource<LocationValue> {
 
-    private static String TAG = LocationService.class.getSimpleName();
+    private static String TAG = LocationResource.class.getSimpleName();
     private static String SENSOR_NAME = "Location-Sensor";
 
     private static HashMap<Long, String> payloadTemplates = new HashMap<>();
@@ -43,7 +44,7 @@ public class LocationService extends AbstractSensorService<LocationValue> {
         );
     }
 
-    protected LocationService(String uriPath, LocationValue initialStatus, ScheduledExecutorService executor) {
+    public LocationResource(String uriPath, LocationValue initialStatus, ScheduledExecutorService executor) {
         super(uriPath, initialStatus, executor);
     }
 
@@ -67,7 +68,8 @@ public class LocationService extends AbstractSensorService<LocationValue> {
         String template = payloadTemplates.get(contentFormat);
 
         if(template != null){
-            return String.format(Locale.ENGLISH, template, getStatus().getLatitude(), getStatus().getLongitude()).getBytes(CoapMessage.CHARSET);
+            return String.format(Locale.ENGLISH, template, getStatus().getLatitude(),
+                    getStatus().getLongitude()).getBytes(CoapMessage.CHARSET);
         }
         else{
             return null;

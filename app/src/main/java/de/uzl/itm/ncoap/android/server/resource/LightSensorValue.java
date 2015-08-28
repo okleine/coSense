@@ -1,21 +1,21 @@
-package de.uzl.itm.ncoap.android.server;
+package de.uzl.itm.ncoap.android.server.resource;
 
 /**
  * Created by olli on 18.05.15.
  */
-public class NoiseSensorValue extends SensorValue<Integer>{
+public class LightSensorValue extends SensorValue<Double> {
 
-    public NoiseSensorValue(double latitude, double longitude, Integer value) {
+    public LightSensorValue(double latitude, double longitude, Double value) {
         super(latitude, longitude, value);
     }
 
     @Override
     public boolean equals(Object object){
-        if(!(object instanceof NoiseSensorValue)){
+        if(!(object instanceof LightSensorValue)){
             return false;
         }
 
-        NoiseSensorValue other = (NoiseSensorValue) object;
+        LightSensorValue other = (LightSensorValue) object;
 
         if(other.getLongitude() != this.getLongitude()) {
             return false;

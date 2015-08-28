@@ -1,28 +1,70 @@
-package de.uzl.itm.ncoap.android.server;
+package de.uzl.itm.ncoap.android.server.resource;
 
 import com.google.common.util.concurrent.SettableFuture;
 
 import java.net.InetSocketAddress;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
-import de.uniluebeck.itm.ncoap.application.server.webservice.ObservableWebservice;
-import de.uniluebeck.itm.ncoap.application.server.webservice.WrappedResourceStatus;
-import de.uniluebeck.itm.ncoap.message.CoapMessage;
-import de.uniluebeck.itm.ncoap.message.CoapRequest;
-import de.uniluebeck.itm.ncoap.message.CoapResponse;
-import de.uniluebeck.itm.ncoap.message.MessageCode;
-import de.uniluebeck.itm.ncoap.message.options.ContentFormat;
+import de.uzl.itm.ncoap.application.server.webresource.ObservableWebresource;
+import de.uzl.itm.ncoap.application.server.webresource.WrappedResourceStatus;
+import de.uzl.itm.ncoap.message.CoapMessage;
+import de.uzl.itm.ncoap.message.CoapRequest;
+import de.uzl.itm.ncoap.message.CoapResponse;
+import de.uzl.itm.ncoap.message.MessageCode;
+import de.uzl.itm.ncoap.message.options.ContentFormat;
 
 /**
  * Created by olli on 18.05.15.
  */
-public abstract class AbstractSensorService<T> extends ObservableWebservice<T> {
+public abstract class AbstractSensorResource<T> extends ObservableWebresource<T> {
 
     public static long DEFAULT_CONTENT_FORMAT = ContentFormat.TEXT_PLAIN_UTF8;
 
-    protected AbstractSensorService(String uriPath, T initialStatus, ScheduledExecutorService executor) {
+    private static HashMap<Long, String> CONTENT_TEMPLATES = new HashMap<>();
+
+    protected static String TURTLE_TEMPLATE =
+            "@prefix geo: <http://www.opengis.net/ont/geosparql#> .\n" +
+            "@prefix ssn: <http://purl.oclc.org/NET/ssnx/ssn#> .\n" +
+            "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" +
+            "@prefix sf: <http://www.opengis.net/ont/sf#> .\n" +
+
+            "%s a ssn:Sensor ;\n\t" +
+                "dul:hasLocation _:location ;\n\t" +
+                "ssn:madeObservation _:observation .\n\n" +
+
+            "_:location a sf:Point ;\n\t" +
+                "geo:asWKT \"<http://www.opengis.net/def/crs/OGC/1.3/CRS84>POINT(%.10f %.10f)\"ˆˆgeo:wktLiteral .\n\n" +
+
+            "_:observation  a ssn:Observation ;\n\t" +
+                "ssn:featureOfInterest  %s ;\n\t" +
+                "ssn:observedProperty  %s ;\n\t" +
+                "ssn:observationResult  _:result .\n\n" +
+
+            "_:result a ssn:SensorOutput ;\n\t" +
+                "ssn:hasValue %s .\n\n" +
+
+            "%s %s %s .";
+
+    static{
+        CONTENT_TEMPLATES.put(ContentFormat.APP_TURTLE, TURTLE_TEMPLATE);
+        CONTENT_TEMPLATES.put(ContentFormat.APP_N3, TURTLE_TEMPLATE);
+    }
+
+
+
+
+    protected String createTurtleString(String sensorName, String featureOfInterest, String observedProperty,
+            String observationValue){
+
+        return String.format(Locale.ENGLISH, TURTLE_TEMPLATE, sensorName, featureOfInterest, observedProperty,
+                observationValue, featureOfInterest, observedProperty, observationValue);
+    }
+
+    protected AbstractSensorResource(String uriPath, T initialStatus, ScheduledExecutorService executor) {
         super(uriPath, initialStatus, executor);
     }
 

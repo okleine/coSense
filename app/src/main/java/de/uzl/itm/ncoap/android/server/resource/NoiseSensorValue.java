@@ -1,21 +1,21 @@
-package de.uzl.itm.ncoap.android.server;
+package de.uzl.itm.ncoap.android.server.resource;
 
 /**
  * Created by olli on 18.05.15.
  */
-public class PressureSensorValue extends SensorValue<Double> {
+public class NoiseSensorValue extends SensorValue<Integer>{
 
-    public PressureSensorValue(double latitude, double longitude, Double value) {
+    public NoiseSensorValue(double latitude, double longitude, Integer value) {
         super(latitude, longitude, value);
     }
 
     @Override
     public boolean equals(Object object){
-        if(!(object instanceof PressureSensorValue)){
+        if(!(object instanceof NoiseSensorValue)){
             return false;
         }
 
-        PressureSensorValue other = (PressureSensorValue) object;
+        NoiseSensorValue other = (NoiseSensorValue) object;
 
         if(other.getLongitude() != this.getLongitude()) {
             return false;

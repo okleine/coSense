@@ -16,8 +16,8 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -30,15 +30,34 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.InetSocketAddress;
+import java.net.URI;
 
-import de.uniluebeck.itm.ncoap.application.server.CoapServerApplication;
-import de.uniluebeck.itm.ncoap.communication.dispatching.server.NotFoundHandler;
+import de.uzl.itm.ncoap.android.server.dialog.SettingsDialog;
+import de.uzl.itm.ncoap.android.server.dialog.StartRegistrationDialog;
+import de.uzl.itm.ncoap.android.server.resource.LightSensorResource;
+import de.uzl.itm.ncoap.android.server.resource.LightSensorValue;
+import de.uzl.itm.ncoap.android.server.resource.LocationResource;
+import de.uzl.itm.ncoap.android.server.resource.LocationValue;
+import de.uzl.itm.ncoap.android.server.resource.NoiseSensorResource;
+import de.uzl.itm.ncoap.android.server.resource.NoiseSensorValue;
+import de.uzl.itm.ncoap.android.server.resource.PressureSensorResource;
+import de.uzl.itm.ncoap.android.server.resource.PressureSensorValue;
+import de.uzl.itm.ncoap.android.server.task.AddressResolutionTask;
+import de.uzl.itm.ncoap.android.server.task.AudioSamplingTask;
+import de.uzl.itm.ncoap.android.server.task.ConnectivityChangeTask;
+import de.uzl.itm.ncoap.android.server.task.ProxyRegistrationTask;
+import de.uzl.itm.ncoap.application.peer.CoapPeerApplication;
+import de.uzl.itm.ncoap.communication.dispatching.client.ClientCallback;
+import de.uzl.itm.ncoap.communication.dispatching.server.NotFoundHandler;
+import de.uzl.itm.ncoap.message.CoapRequest;
+import de.uzl.itm.ncoap.message.CoapResponse;
+import de.uzl.itm.ncoap.message.MessageCode;
+import de.uzl.itm.ncoap.message.MessageType;
 
 
 public class MainActivity extends Activity implements RadioGroup.OnCheckedChangeListener,
-        SettingsDialog.SettingsDialogListener, StartRegistrationDialog.Listener{
+        SettingsDialog.Listener, StartRegistrationDialog.Listener{
 
     private Handler handler = new Handler();
 
@@ -87,11 +106,11 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
     private EditText txtPressure;
     private ProgressBar prbPressure;
 
-    private CoapServerApplication serverApplication;
-    private LightSensorService lightSensorService;
-    private LocationService locationService;
-    private NoiseSensorService noiseSensorService;
-    private PressureSensorService pressureSensorService;
+    private CoapPeerApplication coapApplication;
+    private LightSensorResource lightSensorService;
+    private LocationResource locationResource;
+    private NoiseSensorResource noiseSensorResource;
+    private PressureSensorResource pressureSensorService;
 
     private SettingsDialog settingsDialog;
 
@@ -209,11 +228,11 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
         //Server
         if(group.getId() == R.id.radgroup_server){
             if(checkedId == R.id.rad_server_on){
-                this.serverApplication = new CoapServerApplication(NotFoundHandler.getDefault());
+                this.coapApplication = new CoapPeerApplication(NotFoundHandler.getDefault(), new InetSocketAddress(5683));
             }
             else{
-                this.serverApplication.shutdown();
-                this.serverApplication = null;
+                this.coapApplication.shutdown();
+                this.coapApplication = null;
 
                 //Disable Light Service
                 if(!this.radLightOff.isChecked()) {
@@ -244,10 +263,10 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
                         this.locationListener);
 
                 //Create Location Web Service
-                if(this.serverApplication != null) {
+                if(this.coapApplication != null) {
                     LocationValue initialStatus = new LocationValue(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, null);
-                    this.locationService = new LocationService("/location", initialStatus, serverApplication.getExecutor());
-                    this.serverApplication.registerService(this.locationService);
+                    this.locationResource = new LocationResource("/location", initialStatus, coapApplication.getExecutor());
+                    this.coapApplication.registerResource(this.locationResource);
                 }
                 else{
                     this.radLocationOff.setChecked(true);
@@ -259,9 +278,9 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
                 this.txtLatitude.setText("");
                 this.txtLongitude.setText("");
 
-                if(this.locationService != null) {
-                    this.locationService.shutdown();
-                    this.locationService = null;
+                if(this.locationResource != null) {
+                    this.locationResource.shutdown();
+                    this.locationResource = null;
                 }
             }
         }
@@ -271,14 +290,14 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
                 this.audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate,
                         AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
                 this.audioRecord.startRecording();
-                this.samplingTask = new AudioSamplingTask();
+                this.samplingTask = new AudioSamplingTask(this, audioRecord, this.bufferSize);
                 this.handler.post(this.samplingTask);
 
                 //Register Web Service
-                if(this.serverApplication != null) {
+                if(this.coapApplication != null) {
                     NoiseSensorValue initialStatus = new NoiseSensorValue(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Integer.MIN_VALUE);
-                    this.noiseSensorService = new NoiseSensorService("/noise", initialStatus, serverApplication.getExecutor());
-                    this.serverApplication.registerService(this.noiseSensorService);
+                    this.noiseSensorResource = new NoiseSensorResource("/noise", initialStatus, coapApplication.getExecutor());
+                    this.coapApplication.registerResource(this.noiseSensorResource);
                 }
                 else{
                     this.radNoiseOff.setChecked(true);
@@ -311,10 +330,10 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
                     this.sensorManager.registerListener(this.lightSensorListener, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
                     //Create Light Web Service
-                    if (this.serverApplication != null) {
+                    if (this.coapApplication != null) {
                         LightSensorValue initialStatus = new LightSensorValue(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
-                        this.lightSensorService = new LightSensorService("/light", initialStatus, serverApplication.getExecutor());
-                        this.serverApplication.registerService(this.lightSensorService);
+                        this.lightSensorService = new LightSensorResource("/light", initialStatus, coapApplication.getExecutor());
+                        this.coapApplication.registerResource(this.lightSensorService);
                     } else {
                         this.radLightOff.setChecked(true);
                         Toast.makeText(this, "Server is not running!", Toast.LENGTH_LONG).show();
@@ -347,10 +366,10 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
                     this.sensorManager.registerListener(this.pressureSensorListener, pressureSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
                     //Create Pressure Web Service
-                    if (this.serverApplication != null) {
+                    if (this.coapApplication != null) {
                         PressureSensorValue initialStatus = new PressureSensorValue(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
-                        this.pressureSensorService = new PressureSensorService("/pressure", initialStatus, serverApplication.getExecutor());
-                        this.serverApplication.registerService(this.pressureSensorService);
+                        this.pressureSensorService = new PressureSensorResource("/pressure", initialStatus, coapApplication.getExecutor());
+                        this.coapApplication.registerResource(this.pressureSensorService);
                     } else {
                         this.radPressureOff.setChecked(true);
                         Toast.makeText(this, "Server is not running!", Toast.LENGTH_LONG).show();
@@ -370,84 +389,59 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
         }
     }
 
+
+    public void setTxtProxy(final String proxyIP){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                txtProxy.setText(proxyIP);
+            }
+        });
+    }
+
+
+    public void setTxtIP(final String serverIP){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                txtIP.setText(serverIP);
+            }
+        });
+    }
+
+    public Handler getHandler(){
+        return this.handler;
+    }
+
+
+    public void setNoiseLevel(final int noiseLevel){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                txtNoise.setText("" + noiseLevel);
+                prbNoise.setProgress(noiseLevel);
+            }
+        });
+
+        noiseSensorResource.setNoiseValue(new NoiseSensorValue(latitude, longitude, noiseLevel));
+    }
+
+    public CoapPeerApplication getCoapApplication(){
+        return this.coapApplication;
+    }
+
     @Override
     public void onProxyChanged(String sspHost) {
-        new AddressResolutionTask().execute(sspHost);
+        new AddressResolutionTask(this).execute(sspHost);
     }
 
 
     @Override
     public void registerAtProxy() {
-        Toast.makeText(this, "Registration not yet implemented!", Toast.LENGTH_LONG).show();
+        new ProxyRegistrationTask(this).execute((String) txtProxy.getText());
     }
 
-    private class AddressResolutionTask extends AsyncTask<String, Void, Void>{
 
-        @Override
-        public Void doInBackground(String... params) {
-            try {
-                final InetAddress sspAddress = InetAddress.getByName(params[0]);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        txtProxy.setText(sspAddress.getHostAddress());
-                    }
-                });
-
-            }
-            catch(final UnknownHostException ex){
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(MainActivity.this, ex.getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                });
-
-            }
-
-            return null;
-        }
-    }
-
-    /**
-     * Class to sample audio (peak amplitude) from the mic every 200ms
-     */
-    private class AudioSamplingTask implements Runnable{
-
-        @Override
-        public void run() {
-            try {
-                short[] buffer = new short[bufferSize];
-                int bufferReadResult;
-                int highestLevel = 0;
-
-                bufferReadResult = audioRecord.read(buffer, 0, bufferSize);
-
-                for (int i = 0; i < bufferReadResult; i++) {
-                    if (buffer[i] > highestLevel) {
-                        highestLevel = buffer[i];
-                    }
-                }
-
-                final int finalHighestLevel = highestLevel;
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        txtNoise.setText("" + finalHighestLevel);
-                        prbNoise.setProgress(finalHighestLevel);
-
-                        noiseSensorService.setNoiseValue(new NoiseSensorValue(latitude, longitude, finalHighestLevel));
-                    }
-                });
-
-                handler.postDelayed(this, 200);
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     /*----------Listener class to get coordinates ------------- */
     private class MyLocationListener implements LocationListener {
@@ -458,8 +452,8 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
             txtLatitude.setText("" + location.getLatitude());
             txtLongitude.setText("" + location.getLongitude());
 
-            if(locationService != null) {
-                locationService.setResourceStatus(new LocationValue(latitude, longitude, null), 5);
+            if(locationResource != null) {
+                locationResource.setResourceStatus(new LocationValue(latitude, longitude, null), 5);
             }
         }
 
@@ -479,23 +473,20 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
         }
     }
 
+
     private class NetworkStateReceiver extends BroadcastReceiver {
 
-        private ConnectivityManager connectivityManager;
+        //private ConnectivityManager connectivityManager;
         private WifiManager wifiManager;
 
         public NetworkStateReceiver(Activity activity){
-            this.connectivityManager = (ConnectivityManager) activity.getSystemService(CONNECTIVITY_SERVICE);
+            //this.connectivityManager = (ConnectivityManager) activity.getSystemService(CONNECTIVITY_SERVICE);
             this.wifiManager = (WifiManager) activity.getSystemService(WIFI_SERVICE);
         }
 
         public void onReceive(Context context, Intent intent) {
             Log.d("app", "Network connectivity change");
-
-            int ip = wifiManager.getConnectionInfo().getIpAddress();
-            String ipAddress = String.format("%d.%d.%d.%d", (ip & 0xff), (ip >> 8 & 0xff), (ip >> 16 & 0xff), (ip >> 24 & 0xff));
-            Log.d("app", "IP: " + ipAddress);
-            txtIP.setText(ipAddress);
+            new ConnectivityChangeTask(MainActivity.this).execute(null, null);
         }
     }
 

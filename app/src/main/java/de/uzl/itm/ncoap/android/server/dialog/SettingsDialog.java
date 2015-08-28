@@ -1,4 +1,4 @@
-package de.uzl.itm.ncoap.android.server;
+package de.uzl.itm.ncoap.android.server.dialog;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -14,6 +14,8 @@ import android.widget.Toast;
 import java.util.HashSet;
 import java.util.Set;
 
+import de.uzl.itm.ncoap.android.server.R;
+
 /**
  * Created by olli on 26.08.15.
  */
@@ -21,14 +23,14 @@ public class SettingsDialog extends DialogFragment{
 
     private EditText txtProxy;
 
-    private Set<SettingsDialogListener> listeners = new HashSet<>();
+    private Set<Listener> listeners = new HashSet<>();
 
 
     @Override
     public void onAttach(Activity activity){
         super.onAttach(activity);
-        if(activity instanceof SettingsDialogListener){
-            listeners.add((SettingsDialogListener) activity);
+        if(activity instanceof Listener){
+            listeners.add((Listener) activity);
         }
     }
 
@@ -49,7 +51,7 @@ public class SettingsDialog extends DialogFragment{
 
             .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
-                    for (SettingsDialogListener listener : listeners) {
+                    for (Listener listener : listeners) {
                         listener.onProxyChanged(txtProxy.getText().toString());
                     }
                 }
@@ -68,7 +70,7 @@ public class SettingsDialog extends DialogFragment{
     }
 
 
-     interface SettingsDialogListener {
+     public interface Listener {
         void onProxyChanged(String sspHost);
     }
 }

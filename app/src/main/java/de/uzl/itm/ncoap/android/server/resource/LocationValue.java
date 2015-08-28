@@ -1,4 +1,4 @@
-package de.uzl.itm.ncoap.android.server;
+package de.uzl.itm.ncoap.android.server.resource;
 
 /**
  * Created by olli on 18.05.15.

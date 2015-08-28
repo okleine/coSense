@@ -1,4 +1,4 @@
-package de.uzl.itm.ncoap.android.server;
+package de.uzl.itm.ncoap.android.server.resource;
 
 import android.util.Log;
 
@@ -9,17 +9,18 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import de.uniluebeck.itm.ncoap.application.server.webservice.linkformat.LongLinkAttribute;
-import de.uniluebeck.itm.ncoap.communication.dispatching.client.Token;
-import de.uniluebeck.itm.ncoap.message.CoapMessage;
-import de.uniluebeck.itm.ncoap.message.options.ContentFormat;
+import de.uzl.itm.ncoap.application.server.webresource.linkformat.LongLinkAttribute;
+import de.uzl.itm.ncoap.communication.dispatching.client.Token;
+import de.uzl.itm.ncoap.message.CoapMessage;
+import de.uzl.itm.ncoap.message.options.ContentFormat;
+
 
 /**
  * Created by olli on 18.05.15.
  */
-public class PressureSensorService extends AbstractSensorService<PressureSensorValue> {
+public class PressureSensorResource extends AbstractSensorResource<PressureSensorValue> {
 
-    private static String TAG = LightSensorService.class.getSimpleName();
+    private static String TAG = LightSensorResource.class.getSimpleName();
     private static String SENSOR_NAME = "Pressure-Sensor";
 
 
@@ -63,7 +64,7 @@ public class PressureSensorService extends AbstractSensorService<PressureSensorV
     private byte[] etag = new byte[1];
     private ScheduledFuture statusUpdateFuture;
 
-    protected PressureSensorService(String uriPath, PressureSensorValue initialStatus, ScheduledExecutorService executor) {
+    public PressureSensorResource(String uriPath, PressureSensorValue initialStatus, ScheduledExecutorService executor) {
         super(uriPath, initialStatus, executor);
         this.setLinkAttribute(new LongLinkAttribute(LongLinkAttribute.CONTENT_TYPE, ContentFormat.TEXT_PLAIN_UTF8));
 
@@ -80,7 +81,7 @@ public class PressureSensorService extends AbstractSensorService<PressureSensorV
         }, 1, 5, TimeUnit.SECONDS);
     }
 
-    protected void setPressureValue(PressureSensorValue sensorValue){
+    public void setPressureValue(PressureSensorValue sensorValue){
         this.tmpStatus = sensorValue;
     }
 
