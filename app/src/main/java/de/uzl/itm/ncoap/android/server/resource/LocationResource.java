@@ -13,7 +13,7 @@ import de.uzl.itm.ncoap.message.options.ContentFormat;
 /**
  * Created by olli on 17.05.15.
  */
-public class LocationResource extends AbstractSensorResource<LocationValue> {
+public class LocationResource extends SensorResource<Void, LocationValue> {
 
     private static String TAG = LocationResource.class.getSimpleName();
     private static String SENSOR_NAME = "Location-Sensor";
@@ -49,6 +49,16 @@ public class LocationResource extends AbstractSensorResource<LocationValue> {
     }
 
     @Override
+    public String getPlainObservedPropertyName() {
+        return null;
+    }
+
+    @Override
+    public String getRDFObservedProperty() {
+        return null;
+    }
+
+    @Override
     public boolean isUpdateNotificationConfirmable(InetSocketAddress remoteEndpoint, Token token) {
         return false;
     }
@@ -59,9 +69,10 @@ public class LocationResource extends AbstractSensorResource<LocationValue> {
     }
 
     @Override
-    public void updateEtag(LocationValue locationValue) {
+    public void updateEtag(SensorValue<Void> resourceStatus) {
 
     }
+
 
     @Override
     public byte[] getSerializedResourceStatus(long contentFormat) {
