@@ -3,6 +3,7 @@ package de.uzl.itm.ncoap.android.server.resource;
 import android.util.Log;
 
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -13,51 +14,56 @@ import de.uzl.itm.ncoap.message.options.ContentFormat;
 
 
 /**
- * Created by olli on 17.05.15.
+ * Created by olli on 18.05.15.
  */
-public class LightSensorResource extends SensorResource<Double, LightSensorValue> {
+public class AmbientNoiseSensorResource extends SensorResource<Integer, AmbientNoiseSensorValue> {
 
-    private static String TAG = LightSensorResource.class.getSimpleName();
+    private static String TAG = AmbientNoiseSensorResource.class.getSimpleName();
 
-    private LightSensorValue tmpStatus;
+    private static String PLAIN_OBSERVED_PROPERTY_NAME = "Ambient Noise";
+    private static String RDF_OBSERVED_PROPERTY_NAME = "ambientNoise";
 
+
+    private AmbientNoiseSensorValue tmpStatus;
     private ScheduledFuture statusUpdateFuture;
 
-    public LightSensorResource(String uriPath, LightSensorValue initialStatus, ScheduledExecutorService executor) {
+
+    public AmbientNoiseSensorResource(String uriPath, AmbientNoiseSensorValue initialStatus, ScheduledExecutorService executor) {
         super(uriPath, initialStatus, executor);
         this.setLinkAttribute(new LongLinkAttribute(LongLinkAttribute.CONTENT_TYPE, ContentFormat.TEXT_PLAIN_UTF8));
 
         this.tmpStatus = initialStatus;
 
-        //To avoid permanent updates update the status only every 5 seconds
+        //To avoid permanent updates update the status only every 10 seconds
         this.statusUpdateFuture = executor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 if(!getStatus().equals(tmpStatus)){
-                    setResourceStatus(tmpStatus, 5);
+                    setResourceStatus(tmpStatus, 10);
                 }
             }
-        }, 1, 5, TimeUnit.SECONDS);
+        }, 1, 10, TimeUnit.SECONDS);
     }
+
+
+    public void setNoiseValue(AmbientNoiseSensorValue sensorValue){
+        this.tmpStatus = sensorValue;
+    }
+
 
     @Override
     public String getPlainObservedPropertyName() {
-        return "Ambient Brightness";
+        return PLAIN_OBSERVED_PROPERTY_NAME;
     }
 
     @Override
     public String getRDFSensorType() {
-        return "AmbientBrightnessSensor";
+        return "AmbientNoiseSensor";
     }
 
     @Override
     public String getRDFObservedProperty() {
-        return "ambientBrightness";
-    }
-
-
-    public void setLightValue(LightSensorValue sensorValue){
-        this.tmpStatus = sensorValue;
+        return RDF_OBSERVED_PROPERTY_NAME;
     }
 
     @Override
@@ -67,15 +73,12 @@ public class LightSensorResource extends SensorResource<Double, LightSensorValue
 
 
     @Override
-    public void updateEtag(SensorValue<Double> resourceStatus) {
-        //Make the ETAG the first 4 bytes of the IEEE 754 representation
-        byte[] etag = new byte[4];
-        long tmp = Double.doubleToLongBits(getStatus().getValue());
-        for(int i = 0; i < 4; i++){
-            etag[i] = (byte) (tmp >> (8 * (7-i)) & 0xFF);
-        }
-        setEtag(etag);
+    public void updateEtag(SensorValue<Integer> resourceStatus) {
+        ByteBuffer buffer = ByteBuffer.allocate(4);
+        buffer.putInt(resourceStatus.getValue());
+        setEtag(buffer.array());
     }
+
 
     @Override
     public void shutdown(){
@@ -83,4 +86,8 @@ public class LightSensorResource extends SensorResource<Double, LightSensorValue
         boolean canceled = this.statusUpdateFuture.cancel(true);
         Log.d(TAG, "Resource status updated canceled (" + canceled + ")");
     }
+
+
+
+
 }

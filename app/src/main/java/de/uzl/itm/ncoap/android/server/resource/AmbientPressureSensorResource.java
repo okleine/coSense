@@ -17,7 +17,7 @@ import de.uzl.itm.ncoap.message.options.ContentFormat;
  */
 public class AmbientPressureSensorResource extends SensorResource<Double, AmbientPressureSensorValue> {
 
-    private static String TAG = LightSensorResource.class.getSimpleName();
+    private static String TAG = AmbientBrightnessSensorResource.class.getSimpleName();
 //    private static String SENSOR_NAME = "Pressure-Sensor";
 //
 //
@@ -67,15 +67,15 @@ public class AmbientPressureSensorResource extends SensorResource<Double, Ambien
 
         this.tmpStatus = initialStatus;
 
-        //To avoid permanent updates update the status only every 5 seconds
+        //To avoid permanent updates update the status only every 10 seconds
         this.statusUpdateFuture = executor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 if(!getStatus().equals(tmpStatus)){
-                    setResourceStatus(tmpStatus, 5);
+                    setResourceStatus(tmpStatus, 10);
                 }
             }
-        }, 1, 5, TimeUnit.SECONDS);
+        }, 1, 10, TimeUnit.SECONDS);
     }
 
     @Override

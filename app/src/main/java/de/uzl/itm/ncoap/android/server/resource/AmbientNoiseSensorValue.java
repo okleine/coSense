@@ -3,19 +3,19 @@ package de.uzl.itm.ncoap.android.server.resource;
 /**
  * Created by olli on 18.05.15.
  */
-public class NoiseSensorValue extends SensorValue<Integer>{
+public class AmbientNoiseSensorValue extends SensorValue<Integer>{
 
-    public NoiseSensorValue(double latitude, double longitude, Integer value) {
+    public AmbientNoiseSensorValue(double latitude, double longitude, Integer value) {
         super(latitude, longitude, value);
     }
 
     @Override
     public boolean equals(Object object){
-        if(!(object instanceof NoiseSensorValue)){
+        if(!(object instanceof AmbientNoiseSensorValue)){
             return false;
         }
 
-        NoiseSensorValue other = (NoiseSensorValue) object;
+        AmbientNoiseSensorValue other = (AmbientNoiseSensorValue) object;
 
         if(other.getLongitude() != this.getLongitude()) {
             return false;

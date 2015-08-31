@@ -32,12 +32,12 @@ import java.net.InetSocketAddress;
 
 import de.uzl.itm.ncoap.android.server.dialog.SettingsDialog;
 import de.uzl.itm.ncoap.android.server.dialog.StartRegistrationDialog;
-import de.uzl.itm.ncoap.android.server.resource.LightSensorResource;
-import de.uzl.itm.ncoap.android.server.resource.LightSensorValue;
+import de.uzl.itm.ncoap.android.server.resource.AmbientBrightnessSensorResource;
+import de.uzl.itm.ncoap.android.server.resource.AmbientBrightnessSensorValue;
 import de.uzl.itm.ncoap.android.server.resource.LocationResource;
 import de.uzl.itm.ncoap.android.server.resource.LocationValue;
-import de.uzl.itm.ncoap.android.server.resource.NoiseSensorResource;
-import de.uzl.itm.ncoap.android.server.resource.NoiseSensorValue;
+import de.uzl.itm.ncoap.android.server.resource.AmbientNoiseSensorResource;
+import de.uzl.itm.ncoap.android.server.resource.AmbientNoiseSensorValue;
 import de.uzl.itm.ncoap.android.server.resource.AmbientPressureSensorResource;
 import de.uzl.itm.ncoap.android.server.resource.AmbientPressureSensorValue;
 import de.uzl.itm.ncoap.android.server.task.AddressResolutionTask;
@@ -99,9 +99,9 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
     private ProgressBar prbPressure;
 
     private CoapPeerApplication coapApplication;
-    private LightSensorResource lightSensorService;
+    private AmbientBrightnessSensorResource lightSensorService;
     private LocationResource locationResource;
-    private NoiseSensorResource noiseSensorResource;
+    private AmbientNoiseSensorResource ambientNoiseSensorResource;
     private AmbientPressureSensorResource pressureSensorService;
 
     private SettingsDialog settingsDialog;
@@ -252,7 +252,7 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
         //Location
         else if(group.getId() == R.id.radgroup_gps){
             if(checkedId == R.id.rad_gps_on){
-                this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0,
+                this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0,
                         this.locationListener);
 
                 //Create Location Web Service
@@ -288,9 +288,9 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
 
                 //Register Web Service
                 if(this.coapApplication != null) {
-                    NoiseSensorValue initialStatus = new NoiseSensorValue(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Integer.MIN_VALUE);
-                    this.noiseSensorResource = new NoiseSensorResource("/noise", initialStatus, coapApplication.getExecutor());
-                    this.coapApplication.registerResource(this.noiseSensorResource);
+                    AmbientNoiseSensorValue initialStatus = new AmbientNoiseSensorValue(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Integer.MIN_VALUE);
+                    this.ambientNoiseSensorResource = new AmbientNoiseSensorResource("/noise", initialStatus, coapApplication.getExecutor());
+                    this.coapApplication.registerResource(this.ambientNoiseSensorResource);
                 }
                 else{
                     this.radNoiseOff.setChecked(true);
@@ -324,8 +324,8 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
 
                     //Create Light Web Service
                     if (this.coapApplication != null) {
-                        LightSensorValue initialStatus = new LightSensorValue(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
-                        this.lightSensorService = new LightSensorResource("/light", initialStatus, coapApplication.getExecutor());
+                        AmbientBrightnessSensorValue initialStatus = new AmbientBrightnessSensorValue(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
+                        this.lightSensorService = new AmbientBrightnessSensorResource("/light", initialStatus, coapApplication.getExecutor());
                         this.coapApplication.registerResource(this.lightSensorService);
                     } else {
                         this.radLightOff.setChecked(true);
@@ -416,7 +416,7 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
             }
         });
 
-        noiseSensorResource.setNoiseValue(new NoiseSensorValue(latitude, longitude, noiseLevel));
+        ambientNoiseSensorResource.setNoiseValue(new AmbientNoiseSensorValue(latitude, longitude, noiseLevel));
     }
 
     public CoapPeerApplication getCoapApplication(){
@@ -494,7 +494,7 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
                     prbLight.setProgress((int) Math.log(event.values[0]));
 
                     if(lightSensorService != null) {
-                        lightSensorService.setLightValue(new LightSensorValue(latitude, longitude, (double) event.values[0]));
+                        lightSensorService.setLightValue(new AmbientBrightnessSensorValue(latitude, longitude, (double) event.values[0]));
                     }
                 }
             });
