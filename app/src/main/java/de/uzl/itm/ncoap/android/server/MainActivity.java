@@ -15,8 +15,6 @@ import android.location.LocationManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,7 +29,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.net.InetSocketAddress;
-import java.net.URI;
 
 import de.uzl.itm.ncoap.android.server.dialog.SettingsDialog;
 import de.uzl.itm.ncoap.android.server.dialog.StartRegistrationDialog;
@@ -41,19 +38,14 @@ import de.uzl.itm.ncoap.android.server.resource.LocationResource;
 import de.uzl.itm.ncoap.android.server.resource.LocationValue;
 import de.uzl.itm.ncoap.android.server.resource.NoiseSensorResource;
 import de.uzl.itm.ncoap.android.server.resource.NoiseSensorValue;
-import de.uzl.itm.ncoap.android.server.resource.PressureSensorResource;
-import de.uzl.itm.ncoap.android.server.resource.PressureSensorValue;
+import de.uzl.itm.ncoap.android.server.resource.AmbientPressureSensorResource;
+import de.uzl.itm.ncoap.android.server.resource.AmbientPressureSensorValue;
 import de.uzl.itm.ncoap.android.server.task.AddressResolutionTask;
 import de.uzl.itm.ncoap.android.server.task.AudioSamplingTask;
 import de.uzl.itm.ncoap.android.server.task.ConnectivityChangeTask;
 import de.uzl.itm.ncoap.android.server.task.ProxyRegistrationTask;
 import de.uzl.itm.ncoap.application.peer.CoapPeerApplication;
-import de.uzl.itm.ncoap.communication.dispatching.client.ClientCallback;
 import de.uzl.itm.ncoap.communication.dispatching.server.NotFoundHandler;
-import de.uzl.itm.ncoap.message.CoapRequest;
-import de.uzl.itm.ncoap.message.CoapResponse;
-import de.uzl.itm.ncoap.message.MessageCode;
-import de.uzl.itm.ncoap.message.MessageType;
 
 
 public class MainActivity extends Activity implements RadioGroup.OnCheckedChangeListener,
@@ -110,7 +102,7 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
     private LightSensorResource lightSensorService;
     private LocationResource locationResource;
     private NoiseSensorResource noiseSensorResource;
-    private PressureSensorResource pressureSensorService;
+    private AmbientPressureSensorResource pressureSensorService;
 
     private SettingsDialog settingsDialog;
 
@@ -166,6 +158,7 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
         //Location Manager (for GPS)
         this.locationListener = new MyLocationListener();
         this.locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
 
         //Noise sampling
         this.bufferSize = AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT);
@@ -367,8 +360,8 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
 
                     //Create Pressure Web Service
                     if (this.coapApplication != null) {
-                        PressureSensorValue initialStatus = new PressureSensorValue(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
-                        this.pressureSensorService = new PressureSensorResource("/pressure", initialStatus, coapApplication.getExecutor());
+                        AmbientPressureSensorValue initialStatus = new AmbientPressureSensorValue(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
+                        this.pressureSensorService = new AmbientPressureSensorResource("/pressure", initialStatus, coapApplication.getExecutor());
                         this.coapApplication.registerResource(this.pressureSensorService);
                     } else {
                         this.radPressureOff.setChecked(true);
@@ -524,7 +517,7 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
                     prbPressure.setProgress((int) event.values[0] - 950);
 
                     if(pressureSensorService != null) {
-                        pressureSensorService.setPressureValue(new PressureSensorValue(latitude, longitude, (double) event.values[0]));
+                        pressureSensorService.setPressureValue(new AmbientPressureSensorValue(latitude, longitude, (double) event.values[0]));
                     }
                 }
             });

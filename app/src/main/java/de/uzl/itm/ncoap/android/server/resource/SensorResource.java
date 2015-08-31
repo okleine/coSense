@@ -22,42 +22,50 @@ import de.uzl.itm.ncoap.message.options.ContentFormat;
  */
 public abstract class SensorResource<V, T extends SensorValue<V>> extends ObservableWebresource<SensorValue<V>> {
 
-    public static long DEFAULT_CONTENT_FORMAT = ContentFormat.TEXT_PLAIN_UTF8;
+    public static final long DEFAULT_CONTENT_FORMAT = ContentFormat.TEXT_PLAIN_UTF8;
 
-    private static HashMap<Long, String> CONTENT_TEMPLATES = new HashMap<>();
+    public static final String SENSORS_ONTOLOGY_NAMESPACE =
+            "http://media.itm.uni-luebeck.de/people/kleine/rdf/smartphones#";
+
+    public static final String SENSORS_ONTOLOGY_ABBREVIATION =
+            "smp";
+
 
     private static String PLAIN_TEXT_TEMPLATE =
             "Value of \"%s\" at latitude %.10f and longitude %.10f is %d .";
 
+
+    private static String TURTLE_XSD_PREFIX =
+            "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n";
+
     private static String TURTLE_TEMPLATE =
             "@prefix geo: <http://www.opengis.net/ont/geosparql#> .\n" +
             "@prefix ssn: <http://purl.oclc.org/NET/ssnx/ssn#> .\n" +
-            "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" +
             "@prefix sf: <http://www.opengis.net/ont/sf#> .\n" +
+            "@prefix " + SENSORS_ONTOLOGY_ABBREVIATION + ": <" + SENSORS_ONTOLOGY_NAMESPACE + "> .\n" +
+            "@prefix dul: <http://www.loa-cnr.it/ontologies/DUL.owl#> .\n\n" +
 
-            "_:sensor a ssn:Sensor ;\n\t" +
+            "_:sensor a " + SENSORS_ONTOLOGY_ABBREVIATION + ":%s ;\n\t" +
                 "dul:hasLocation _:location ;\n\t" +
                 "ssn:madeObservation _:observation .\n\n" +
 
-            "_:location a sf:Point ;\n\t" +
-                "geo:asWKT \"<http://www.opengis.net/def/crs/OGC/1.3/CRS84>POINT(%.10f %.10f)\"ˆˆgeo:wktLiteral .\n\n" +
-
             "_:observation  a ssn:Observation ;\n\t" +
                 "ssn:featureOfInterest  _:location ;\n\t" +
-                "ssn:observedProperty  %s ;\n\t" +
+                "ssn:observedProperty  " + SENSORS_ONTOLOGY_ABBREVIATION + ":%s ;\n\t" +
                 "ssn:observationResult  _:result .\n\n" +
 
             "_:result a ssn:SensorOutput ;\n\t" +
-                "ssn:hasValue %s .\n\n" +
+                "ssn:hasValue %s .";
 
-            "_:location %s %s .";
+    private static String TURTLE_UNKNOWN_LOCATION_TEMPLATE =
+            "_:location a sf:Point ;\n\t" +
+                SENSORS_ONTOLOGY_ABBREVIATION + ":%s %s .";
 
+    private static String TURTLE_LOCATION_TEMPLATE_WITH_COORDS =
+            "_:location a sf:Point ;\n\t" +
+                SENSORS_ONTOLOGY_ABBREVIATION + ":%s %s ;\n\t" +
+                "geo:asWKT \"<http://www.opengis.net/def/crs/OGC/1.3/CRS84>POINT(%.10f %.10f)\"^^geo:wktLiteral .";
 
-    static{
-        CONTENT_TEMPLATES.put(ContentFormat.TEXT_PLAIN_UTF8, PLAIN_TEXT_TEMPLATE);
-        CONTENT_TEMPLATES.put(ContentFormat.APP_TURTLE, TURTLE_TEMPLATE);
-        CONTENT_TEMPLATES.put(ContentFormat.APP_N3, TURTLE_TEMPLATE);
-    }
 
     private byte[] etag;
 
@@ -70,6 +78,8 @@ public abstract class SensorResource<V, T extends SensorValue<V>> extends Observ
      * @return the plain text name of the property observed by this sensor
      */
     public abstract String getPlainObservedPropertyName();
+
+    public abstract String getRDFSensorType();
 
 //    /**
 //     * The RDF name of the sensor resource (either a URI or a blank node, e.g. "_:mysensor")
@@ -96,22 +106,35 @@ public abstract class SensorResource<V, T extends SensorValue<V>> extends Observ
 
     @Override
     public byte[] getSerializedResourceStatus(long contentFormat) {
-        String template = CONTENT_TEMPLATES.get(contentFormat);
-        if(template == null){
-            return null;
-        }
 
         double lat = getStatus().getLatitude();
         double lon = getStatus().getLongitude();
-        V value = getStatus().getValue();
+        V plainValue = getStatus().getValue();
 
         if(contentFormat == ContentFormat.APP_TURTLE || contentFormat == ContentFormat.APP_N3){
-            return String.format(Locale.ENGLISH, template, lat, lon, getRDFObservedProperty(),
-                    value, getRDFObservedProperty(), value).getBytes(CoapMessage.CHARSET);
+            String xsdType = getStatus().getXsdType() == null ? "" : getStatus().getXsdType();
+            String typedValue = "\"" + plainValue + "\"^^" + xsdType;
+            String observedProperty = getRDFObservedProperty();
+            String sensorType = getRDFSensorType();
+
+            String turtle = getStatus().getXsdType() == null ? "" : TURTLE_XSD_PREFIX;
+            turtle += String.format(Locale.ENGLISH, TURTLE_TEMPLATE, sensorType, observedProperty,
+                    typedValue) + "\n\n";
+
+            if(lat == Double.POSITIVE_INFINITY){
+                turtle += String.format(Locale.ENGLISH, TURTLE_UNKNOWN_LOCATION_TEMPLATE,
+                        observedProperty, typedValue);
+            }
+            else{
+                turtle += String.format(Locale.ENGLISH, TURTLE_LOCATION_TEMPLATE_WITH_COORDS,
+                        observedProperty, typedValue, lat, lon);
+            }
+
+            return turtle.getBytes(CoapMessage.CHARSET);
         }
 
-        return String.format(Locale.ENGLISH, template, getPlainObservedPropertyName(), lat, lon,
-                value).getBytes(CoapMessage.CHARSET);
+        return String.format(Locale.ENGLISH, PLAIN_TEXT_TEMPLATE, getPlainObservedPropertyName(),
+                lat, lon, plainValue).getBytes(CoapMessage.CHARSET);
 
     }
 

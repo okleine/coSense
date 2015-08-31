@@ -46,6 +46,11 @@ public class LightSensorResource extends SensorResource<Double, LightSensorValue
     }
 
     @Override
+    public String getRDFSensorType() {
+        return "AmbientBrightnessSensor";
+    }
+
+    @Override
     public String getRDFObservedProperty() {
         return "ambientBrightness";
     }

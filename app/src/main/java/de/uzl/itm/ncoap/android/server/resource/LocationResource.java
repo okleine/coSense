@@ -16,33 +16,55 @@ import de.uzl.itm.ncoap.message.options.ContentFormat;
 public class LocationResource extends SensorResource<Void, LocationValue> {
 
     private static String TAG = LocationResource.class.getSimpleName();
-    private static String SENSOR_NAME = "Location-Sensor";
 
-    private static HashMap<Long, String> payloadTemplates = new HashMap<>();
-    static{
-        //Add template for plaintext UTF-8 payload
-        payloadTemplates.put(
-                ContentFormat.TEXT_PLAIN_UTF8,
-                "Current position is %.10f (LAT) and %.10f (LON)."
-        );
+    //private static HashMap<Long, String> CONTENT_TEMPLATES = new HashMap<>();
 
-        //Add template for XML payload
-        payloadTemplates.put(
-                ContentFormat.APP_N3,
-                "@prefix exp: <http://example.org/itm/light#> .\n" +
-                        "@prefix geo: <http://www.opengis.net/ont/geosparql#> .\n" +
-                        "@prefix ssn: <http://purl.oclc.org/NET/ssnx/ssn#> .\n" +
-                        "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" +
-                        "@prefix sf: <http://www.opengis.net/ont/sf#> .\n" +
-                        "@prefix vo: <http://www.auto-nomos.de/ontologies/vanet-ontology#> .\n\n" +
+    private static String PLAIN_TEXT_TEMPLATE =
+            "Current position is at latitude \"%.10f\" and longitude \"%.10f\".";
 
-                        "exp:" + SENSOR_NAME + "\n" +
-                        "\tvo:hasLocation exp:" + SENSOR_NAME + "-Position ;\n" +
-                        "\texp:" + SENSOR_NAME + "-Position a sf:Point;\n" +
-                        "\tgeo:asWKT \"<http://www.opengis.net/def/crs/OGC/1.3/CRS84>\n" +
-                        "\tPOINT(%.10f %.10f)\"ˆˆgeo:wktLiteral .\n\n"
-        );
-    }
+    private static String RDF_SENSOR_TYPE = "PositionSensor";
+
+    private static String TURTLE_STRING_WITHOUT_OBSERVATION =
+            "@prefix ssn: <http://purl.oclc.org/NET/ssnx/ssn#> .\n" +
+            "@prefix sf: <http://www.opengis.net/ont/sf#> .\n" +
+            "@prefix " + SENSORS_ONTOLOGY_ABBREVIATION + ": <" + SENSORS_ONTOLOGY_NAMESPACE + "> .\n" +
+            "@prefix dul: <http://www.loa-cnr.it/ontologies/DUL.owl#> .\n\n" +
+
+            "_:sensor a " + SENSORS_ONTOLOGY_ABBREVIATION + ":" + RDF_SENSOR_TYPE + ";\n\t" +
+                "ssn:onPlatform  _:phone .\n\n" +
+
+            "_:phone dul:hasLocation _:location ;\n\t" +
+                    " a " + SENSORS_ONTOLOGY_ABBREVIATION + ":Smartphone .\n\n" +
+
+            "_:location a sf:Point .";
+
+
+    private static String TURTLE_TEMPLATE_WITH_OBSERVATION =
+            "@prefix geo: <http://www.opengis.net/ont/geosparql#> .\n" +
+            "@prefix ssn: <http://purl.oclc.org/NET/ssnx/ssn#> .\n" +
+            "@prefix sf: <http://www.opengis.net/ont/sf#> .\n" +
+            "@prefix " + SENSORS_ONTOLOGY_ABBREVIATION + ": <" + SENSORS_ONTOLOGY_NAMESPACE + "> .\n" +
+            "@prefix dul: <http://www.loa-cnr.it/ontologies/DUL.owl#> .\n\n" +
+
+            "_:sensor a " + SENSORS_ONTOLOGY_ABBREVIATION + ":" + RDF_SENSOR_TYPE + ";\n\t" +
+                "ssn:onPlatform  _:phone ;\n\t" +
+                "ssn:madeObservation _:observation .\n\n" +
+
+            "_:observation  a ssn:Observation ;\n\t" +
+                "ssn:featureOfInterest  _:phone ;\n\t" +
+                "ssn:observedProperty  dul:hasLocation ;\n\t" +
+                "ssn:observationResult  _:result .\n\n" +
+
+            "_:result a ssn:SensorOutput ;\n\t" +
+                "ssn:hasValue _:location .\n\n" +
+
+            "_:phone dul:hasLocation _:location ;\n\t" +
+                "a " + SENSORS_ONTOLOGY_ABBREVIATION + ":Smartphone .\n\n" +
+
+            "_:location a sf:Point ;\n\t" +
+                "geo:asWKT \"<http://www.opengis.net/def/crs/OGC/1.3/CRS84>POINT(%.10f %.10f)\"^^geo:wktLiteral .";
+
+
 
     public LocationResource(String uriPath, LocationValue initialStatus, ScheduledExecutorService executor) {
         super(uriPath, initialStatus, executor);
@@ -51,6 +73,11 @@ public class LocationResource extends SensorResource<Void, LocationValue> {
     @Override
     public String getPlainObservedPropertyName() {
         return null;
+    }
+
+    @Override
+    public String getRDFSensorType() {
+        return "PositionSensor";
     }
 
     @Override
@@ -76,14 +103,22 @@ public class LocationResource extends SensorResource<Void, LocationValue> {
 
     @Override
     public byte[] getSerializedResourceStatus(long contentFormat) {
-        String template = payloadTemplates.get(contentFormat);
 
-        if(template != null){
-            return String.format(Locale.ENGLISH, template, getStatus().getLatitude(),
-                    getStatus().getLongitude()).getBytes(CoapMessage.CHARSET);
+        double lat = getStatus().getLatitude();
+        double lon = getStatus().getLongitude();
+
+        if(contentFormat == ContentFormat.APP_TURTLE || contentFormat == ContentFormat.APP_N3){
+
+            if(lat == Double.POSITIVE_INFINITY){
+               return TURTLE_STRING_WITHOUT_OBSERVATION.getBytes(CoapMessage.CHARSET);
+            }
+            else{
+                return String.format(Locale.ENGLISH, TURTLE_TEMPLATE_WITH_OBSERVATION,
+                        lat, lon).getBytes(CoapMessage.CHARSET);
+            }
         }
-        else{
-            return null;
-        }
+
+        return String.format(Locale.ENGLISH, PLAIN_TEXT_TEMPLATE, lat, lon).getBytes(CoapMessage.CHARSET);
+
     }
 }

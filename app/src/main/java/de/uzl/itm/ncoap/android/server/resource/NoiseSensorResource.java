@@ -57,6 +57,11 @@ public class NoiseSensorResource extends SensorResource<Integer, NoiseSensorValu
     }
 
     @Override
+    public String getRDFSensorType() {
+        return "AmbientNoiseSensor";
+    }
+
+    @Override
     public String getRDFObservedProperty() {
         return RDF_OBSERVED_PROPERTY_NAME;
     }

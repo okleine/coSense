@@ -3,23 +3,19 @@ package de.uzl.itm.ncoap.android.server.resource;
 import android.util.Log;
 
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Locale;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import de.uzl.itm.ncoap.application.server.webresource.linkformat.LongLinkAttribute;
 import de.uzl.itm.ncoap.communication.dispatching.client.Token;
-import de.uzl.itm.ncoap.message.CoapMessage;
 import de.uzl.itm.ncoap.message.options.ContentFormat;
 
 
 /**
  * Created by olli on 18.05.15.
  */
-public class PressureSensorResource extends SensorResource<Double, PressureSensorValue> {
+public class AmbientPressureSensorResource extends SensorResource<Double, AmbientPressureSensorValue> {
 
     private static String TAG = LightSensorResource.class.getSimpleName();
 //    private static String SENSOR_NAME = "Pressure-Sensor";
@@ -61,11 +57,11 @@ public class PressureSensorResource extends SensorResource<Double, PressureSenso
 //        );
 //    }
 
-    private PressureSensorValue tmpStatus;
+    private AmbientPressureSensorValue tmpStatus;
     //private byte[] etag = new byte[1];
     private ScheduledFuture statusUpdateFuture;
 
-    public PressureSensorResource(String uriPath, PressureSensorValue initialStatus, ScheduledExecutorService executor) {
+    public AmbientPressureSensorResource(String uriPath, AmbientPressureSensorValue initialStatus, ScheduledExecutorService executor) {
         super(uriPath, initialStatus, executor);
         this.setLinkAttribute(new LongLinkAttribute(LongLinkAttribute.CONTENT_TYPE, ContentFormat.TEXT_PLAIN_UTF8));
 
@@ -88,11 +84,16 @@ public class PressureSensorResource extends SensorResource<Double, PressureSenso
     }
 
     @Override
+    public String getRDFSensorType() {
+        return "AmbientPressureSensor";
+    }
+
+    @Override
     public String getRDFObservedProperty() {
         return "ambientPressure";
     }
 
-    public void setPressureValue(PressureSensorValue sensorValue){
+    public void setPressureValue(AmbientPressureSensorValue sensorValue){
         this.tmpStatus = sensorValue;
     }
 
@@ -113,29 +114,11 @@ public class PressureSensorResource extends SensorResource<Double, PressureSenso
     }
 
 
-
     @Override
     public void shutdown(){
         super.shutdown();
         boolean canceled = this.statusUpdateFuture.cancel(true);
         Log.d(TAG, "Resource status updated canceled (" + canceled + ")");
     }
-
-//    @Override
-//    public byte[] getSerializedResourceStatus(long contentFormat) {
-//        String template = payloadTemplates.get(contentFormat);
-//
-//        if(template != null){
-//            double lat = getStatus().getLatitude();
-//            double lon = getStatus().getLongitude();
-//            double value = getStatus().getValue();
-//
-//            return String.format(Locale.ENGLISH, template, lat, lon, value).getBytes(CoapMessage.CHARSET);
-//        }
-//        else{
-//            return null;
-//        }
-//    }
-
 
 }
