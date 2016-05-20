@@ -1,8 +1,9 @@
 <resources>
-    <string name="app_name">coSense</string>
+    <string name="app_name">COSENSE</string>
+    <string name="app_subtitle">CoAP Server for mobile Sensors</string>
 
     <string name="ip_label">IP:</string>
-    <string name="server_label">CoAP Server</string>
+    <string name="server_label">Overall Server Status</string>
     <string name="sensors_label">Resource Settings</string>
 
     <!--Sensor Labels-->
@@ -14,7 +15,7 @@
     <string name="noise_meter_label">0 – 32.768</string>
     <string name="light_label">Ambient Light</string>
     <string name="light_unit">Lux</string>
-    <string name="light_meter_label">0 – 200.000 (log scale)</string>
+    <string name="light_meter_label">0 – 200K (log scale)</string>
     <string name="pressure_label">Ambient Pressure</string>
     <string name="pressure_unit">hPa</string>
     <string name="pressure_meter_label">950 – 1050</string>
@@ -27,7 +28,7 @@
     <string name="on">ON</string>
     <string name="off">OFF</string>
 
-    <string name="ssp_label">Proxy:</string>
+    <string name="ssp_label">Proxy (SSP):</string>
     <string name="ssp_settings">Configure SSP</string>
     <string name="ssp_registration">Register at SSP</string>
     <string name="ssp_hint">Hostname or IP</string>

@@ -2,14 +2,9 @@ package de.uzl.itm.ncoap.android.server.resource;
 
 import android.util.Log;
 
-import java.net.InetSocketAddress;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
-import de.uzl.itm.ncoap.application.server.webresource.linkformat.LongLinkAttribute;
-import de.uzl.itm.ncoap.communication.dispatching.client.Token;
-import de.uzl.itm.ncoap.message.options.ContentFormat;
 
 
 /**
@@ -63,7 +58,6 @@ public class AmbientPressureSensorResource extends SensorResource<Double, Ambien
 
     public AmbientPressureSensorResource(String uriPath, AmbientPressureSensorValue initialStatus, ScheduledExecutorService executor) {
         super(uriPath, initialStatus, executor);
-        this.setLinkAttribute(new LongLinkAttribute(LongLinkAttribute.CONTENT_TYPE, ContentFormat.TEXT_PLAIN_UTF8));
 
         this.tmpStatus = initialStatus;
 
@@ -71,7 +65,7 @@ public class AmbientPressureSensorResource extends SensorResource<Double, Ambien
         this.statusUpdateFuture = executor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                if(!getStatus().equals(tmpStatus)){
+                if(!getResourceStatus().equals(tmpStatus)){
                     setResourceStatus(tmpStatus, 10);
                 }
             }
@@ -97,16 +91,12 @@ public class AmbientPressureSensorResource extends SensorResource<Double, Ambien
         this.tmpStatus = sensorValue;
     }
 
-    @Override
-    public boolean isUpdateNotificationConfirmable(InetSocketAddress remoteEndpoint, Token token) {
-        return false;
-    }
 
 
     @Override
     public void updateEtag(SensorValue<Double> resourceStatus) {
         byte[] etag = new byte[4];
-        long tmp = Double.doubleToLongBits(getStatus().getValue());
+        long tmp = Double.doubleToLongBits(getResourceStatus().getValue());
         for(int i = 0; i < 4; i++){
             etag[i] = (byte) (tmp >> (8 * (7-i)) & 0xFF);
         }

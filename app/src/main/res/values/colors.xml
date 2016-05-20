@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--<color name="background_color">#888888</color>-->
+    <color name="text_color">#00000000</color>
+    <color name="bg_light_grey_1">#DDDDDD</color>
+    <color name="bg_light_grey_2">#BBBBBB</color>
+    <color name="sf_orange">#ff6600</color>
+</resources>

@@ -26,8 +26,6 @@ public abstract class SensorValue <T>{
         }
     }
 
-
-
     public double getLatitude() {
         return latitude;
     }

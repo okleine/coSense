@@ -22,175 +22,177 @@
 
     <!--Server-->
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="5dp"
-        android:layout_marginBottom="10dp">
-
-        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp">
+            android:orientation="vertical"
+            android:padding="5dp"
+            android:layout_marginBottom="10dp">
+
+        <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp">
 
             <TextView style="@style/ResourceHeading"
-                android:id="@+id/server_label"
-                android:text="@string/server_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
+                      android:id="@+id/server_label"
+                      android:text="@string/server_label"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_centerVertical="true"
             />
 
             <RadioGroup
-                android:id="@+id/radgroup_server"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentEnd="true">
-
-                <RadioButton
-                    android:id="@+id/rad_server_on"
+                    android:id="@+id/radgroup_server"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/on"
-                    />
+                    android:orientation="horizontal"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true">
 
                 <RadioButton
-                    android:id="@+id/rad_server_off"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/off"
-                    android:checked="true"
-                    />
+                        android:id="@+id/rad_server_on"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/on"
+                        android:checked="true"
+                />
+
+                <RadioButton
+                        android:id="@+id/rad_server_off"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/off"
+                />
             </RadioGroup>
         </RelativeLayout>
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+        >
 
             <TextView
-                android:id="@+id/ip_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginRight="5dp"
-                android:text="@string/ip_label"
-                />
+                    android:id="@+id/ip_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="5dp"
+                    android:text="@string/ip_label"
+            />
 
             <TextView
-                android:id="@+id/ip_txt"
-                android:layout_width="0dp"
-                android:layout_weight=".5"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:singleLine="true"
-                android:background="@null"
-                android:clickable="false"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                />
+                    android:id="@+id/ip_txt"
+                    android:layout_width="0dp"
+                    android:layout_weight=".5"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:singleLine="true"
+                    android:background="@null"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:text="192.168.1.100"
+            />
 
             <TextView
-                android:id="@+id/ssp_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginRight="5dp"
-                android:text="@string/ssp_label"
-                android:layout_marginLeft="5dp"
-                />
+                    android:id="@+id/ssp_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="5dp"
+                    android:text="@string/ssp_label"
+                    android:layout_marginLeft="5dp"
+            />
 
             <TextView
-                android:id="@+id/ssp_txt"
-                android:layout_width="0dp"
-                android:layout_weight=".5"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:singleLine="true"
-                android:background="@null"
-                android:clickable="false"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                />
+                    android:id="@+id/ssp_txt"
+                    android:layout_width="0dp"
+                    android:layout_weight=".5"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:singleLine="true"
+                    android:background="@null"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:text="12.34.56.78"
+            />
         </LinearLayout>
 
     </LinearLayout>
 
     <!--Sensors Title-->
     <!--<LinearLayout-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_marginTop="10dp"-->
-        <!--android:layout_marginBottom="10dp"-->
-        <!--android:weightSum="2">-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_marginTop="10dp"-->
+    <!--android:layout_marginBottom="10dp"-->
+    <!--android:weightSum="2">-->
 
-        <!--<TextView-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_weight="1"-->
-            <!--android:layout_height="2px"-->
-            <!--android:layout_gravity="center_vertical"-->
-            <!--android:background="@drawable/line"-->
-            <!--/>-->
+    <!--<TextView-->
+    <!--android:layout_width="0dp"-->
+    <!--android:layout_weight="1"-->
+    <!--android:layout_height="2px"-->
+    <!--android:layout_gravity="center_vertical"-->
+    <!--android:background="@drawable/line"-->
+    <!--/>-->
 
-        <!--<TextView-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:padding="5dp"-->
-            <!--android:background="@drawable/rectangle"-->
-            <!--android:textColor="#000000"-->
-            <!--android:text="@string/sensors_label"-->
-            <!--/>-->
+    <!--<TextView-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:padding="5dp"-->
+    <!--android:background="@drawable/rectangle"-->
+    <!--android:textColor="#000000"-->
+    <!--android:text="@string/sensors_label"-->
+    <!--/>-->
 
-        <!--<TextView-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_weight="1"-->
-            <!--android:layout_height="2px"-->
-            <!--android:layout_gravity="center_vertical"-->
-            <!--android:background="@drawable/line"-->
-            <!--/>-->
+    <!--<TextView-->
+    <!--android:layout_width="0dp"-->
+    <!--android:layout_weight="1"-->
+    <!--android:layout_height="2px"-->
+    <!--android:layout_gravity="center_vertical"-->
+    <!--android:background="@drawable/line"-->
+    <!--/>-->
 
     <!--</LinearLayout>-->
 
     <!--Make the rest scrollable-->
     <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:scrollbars="vertical"
-        android:fillViewport="true">
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:scrollbars="vertical"
+            android:fillViewport="true">
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
             <!--GPS-->
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="5dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
-                android:background="@color/bg_light_grey_2">
-
-                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp">
+                    android:orientation="vertical"
+                    android:padding="5dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:background="@color/bg_light_grey_2">
 
-                        <TextView style="@style/ResourceHeading"
-                            android:id="@+id/gps_label"
-                            android:text="@string/gps_label"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            />
+                <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp">
 
-                        <RadioGroup
+                    <TextView style="@style/ResourceHeading"
+                              android:id="@+id/gps_label"
+                              android:text="@string/gps_label"
+                              android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_centerVertical="true"
+                    />
+
+                    <RadioGroup
                             android:id="@+id/radgroup_gps"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -198,45 +200,45 @@
                             android:layout_alignParentRight="true"
                             android:layout_alignParentEnd="true">
 
-                            <RadioButton
+                        <RadioButton
                                 android:id="@+id/rad_gps_on"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/on"
-                               />
+                                android:checked="true"
+                        />
 
-                            <RadioButton
+                        <RadioButton
                                 android:id="@+id/rad_gps_off"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/off"
-                                android:checked="true"
-                                />
-                        </RadioGroup>
-                    </RelativeLayout>
+                        />
+                    </RadioGroup>
+                </RelativeLayout>
 
-                    <LinearLayout
+                <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:weightSum="2"
-                        >
+                >
 
-                        <LinearLayout
+                    <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:orientation="vertical">
 
-                            <TextView
+                        <TextView
                                 android:id="@+id/lat_label"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginBottom="2dp"
                                 android:text="@string/lat_label"
-                                />
+                        />
 
-                            <EditText
+                        <EditText
                                 android:id="@+id/lat_txt"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -248,21 +250,22 @@
                                 android:cursorVisible="false"
                                 android:focusable="false"
                                 android:focusableInTouchMode="false"
-                                />
-                        </LinearLayout>
+                                android:text="53.860121"
+                        />
+                    </LinearLayout>
 
-                        <Space
+                    <Space
                             android:layout_width="10dp"
                             android:layout_height="1dp" />
 
-                        <LinearLayout
+                    <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:orientation="vertical">
 
 
-                            <TextView
+                        <TextView
                                 android:id="@+id/long_label"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -270,7 +273,7 @@
                                 android:layout_marginBottom="2dp"
                                 android:text="@string/long_label"/>
 
-                            <EditText
+                        <EditText
                                 android:id="@+id/long_txt"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -282,14 +285,15 @@
                                 android:cursorVisible="false"
                                 android:focusable="false"
                                 android:focusableInTouchMode="false"
-                                />
-                        </LinearLayout>
+                                android:text="10.693830"
+                        />
                     </LinearLayout>
-
                 </LinearLayout>
 
-                <!--Pressure-->
-                <LinearLayout
+            </LinearLayout>
+
+            <!--Pressure-->
+            <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="5dp"
@@ -297,20 +301,20 @@
                     android:orientation="vertical"
                     android:background="@color/bg_light_grey_1">
 
-                    <RelativeLayout
+                <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="10dp">
 
-                        <TextView style="@style/ResourceHeading"
-                            android:id="@+id/pressure_label"
-                            android:text="@string/pressure_label"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            />
+                    <TextView style="@style/ResourceHeading"
+                              android:id="@+id/pressure_label"
+                              android:text="@string/pressure_label"
+                              android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_gravity="center_vertical"
+                    />
 
-                        <RadioGroup
+                    <RadioGroup
                             android:id="@+id/radgroup_pressure"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -318,44 +322,44 @@
                             android:layout_alignParentRight="true"
                             android:layout_alignParentEnd="true">
 
-                            <RadioButton
+                        <RadioButton
                                 android:id="@+id/rad_pressure_on"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/on"
-                                />
+                                android:checked="true"
+                        />
 
-                            <RadioButton
+                        <RadioButton
                                 android:id="@+id/rad_pressure_off"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/off"
-                                android:checked="true"
-                               />
-                        </RadioGroup>
-                    </RelativeLayout>
+                        />
+                    </RadioGroup>
+                </RelativeLayout>
 
-                    <LinearLayout
+                <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="5dp"
                         android:weightSum="2">
 
-                        <LinearLayout
+                    <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:orientation="vertical">
 
-                            <TextView
+                        <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/pressure_unit"
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginBottom="2dp"
-                                />
+                        />
 
-                            <EditText
+                        <EditText
                                 android:id="@+id/pressure_txt"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -369,47 +373,48 @@
                                 android:cursorVisible="false"
                                 android:focusable="false"
                                 android:focusableInTouchMode="false"
-                                />
-                        </LinearLayout>
+                                android:text="1015.24"
+                        />
+                    </LinearLayout>
 
-                        <Space
+                    <Space
                             android:layout_width="10dp"
                             android:layout_height="1dp" />
 
-                        <LinearLayout
+                    <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:orientation="vertical">
 
-                            <TextView
+                        <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/pressure_meter_label"
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginBottom="2dp"
-                                />
+                        />
 
-                            <LinearLayout
+                        <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="fill_parent">
 
-                                <ProgressBar
+                            <ProgressBar style="@android:style/Widget.ProgressBar.Horizontal"
                                     android:id="@+id/pressure_prb"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:layout_gravity="center_vertical"
-                                    style="@android:style/Widget.ProgressBar.Horizontal"
-                                    />
+                                    android:progress="65"
+                            />
 
-                            </LinearLayout>
                         </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
+            </LinearLayout>
 
 
-                <!--Light-->
-                <LinearLayout
+            <!--Light-->
+            <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="5dp"
@@ -417,20 +422,20 @@
                     android:orientation="vertical"
                     android:background="@color/bg_light_grey_2">
 
-                    <RelativeLayout
+                <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="10dp">
 
-                        <TextView style="@style/ResourceHeading"
-                            android:id="@+id/light_label"
-                            android:text="@string/light_label"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            />
+                    <TextView style="@style/ResourceHeading"
+                              android:id="@+id/light_label"
+                              android:text="@string/light_label"
+                              android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_gravity="center_vertical"
+                    />
 
-                        <RadioGroup
+                    <RadioGroup
                             android:id="@+id/radgroup_light"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -438,44 +443,44 @@
                             android:layout_alignParentRight="true"
                             android:layout_alignParentEnd="true">
 
-                            <RadioButton
+                        <RadioButton
                                 android:id="@+id/rad_light_on"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/on"
-                                />
+                        />
 
-                            <RadioButton
+                        <RadioButton
                                 android:id="@+id/rad_light_off"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/off"
                                 android:checked="true"
-                                />
-                        </RadioGroup>
-                    </RelativeLayout>
+                        />
+                    </RadioGroup>
+                </RelativeLayout>
 
-                    <LinearLayout
+                <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="5dp"
                         android:weightSum="2">
 
-                        <LinearLayout
+                    <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:orientation="vertical">
 
-                            <TextView
+                        <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/light_unit"
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginBottom="2dp"
-                                />
+                        />
 
-                            <EditText
+                        <EditText
                                 android:id="@+id/light_txt"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -489,161 +494,161 @@
                                 android:cursorVisible="false"
                                 android:focusable="false"
                                 android:focusableInTouchMode="false"
-                                />
-                        </LinearLayout>
+                        />
+                    </LinearLayout>
 
-                        <Space
+                    <Space
                             android:layout_width="10dp"
                             android:layout_height="1dp" />
 
-                        <LinearLayout
+                    <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:orientation="vertical">
 
-                            <TextView
+                        <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/light_meter_label"
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginBottom="2dp"
-                                />
+                        />
 
-                            <LinearLayout
+                        <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="fill_parent">
 
-                                <ProgressBar
+                            <ProgressBar
                                     android:id="@+id/light_prb"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:layout_gravity="center_vertical"
                                     style="@android:style/Widget.ProgressBar.Horizontal"
-                                />
+                            />
 
-                            </LinearLayout>
                         </LinearLayout>
-
-
                     </LinearLayout>
+
+
                 </LinearLayout>
+            </LinearLayout>
 
             <!--Noise-->
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="5dp"
-                android:layout_marginBottom="5dp"
-                android:orientation="vertical"
-                android:background="@color/bg_light_grey_1">
-
-                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp">
+                    android:padding="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:orientation="vertical"
+                    android:background="@color/bg_light_grey_1">
+
+                <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp">
 
                     <TextView style="@style/ResourceHeading"
-                        android:id="@+id/noise_label"
-                        android:text="@string/noise_label"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        />
+                              android:id="@+id/noise_label"
+                              android:text="@string/noise_label"
+                              android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_gravity="center_vertical"
+                    />
 
                     <RadioGroup
-                        android:id="@+id/radgroup_noise"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_alignParentRight="true"
-                        android:layout_alignParentEnd="true">
-
-                        <RadioButton
-                            android:id="@+id/rad_noise_on"
+                            android:id="@+id/radgroup_noise"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/on"
-
-                            />
+                            android:orientation="horizontal"
+                            android:layout_alignParentRight="true"
+                            android:layout_alignParentEnd="true">
 
                         <RadioButton
-                            android:id="@+id/rad_noise_off"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/off"
-                            android:checked="true"
-                            />
+                                android:id="@+id/rad_noise_on"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/on"
+
+                        />
+
+                        <RadioButton
+                                android:id="@+id/rad_noise_off"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/off"
+                                android:checked="true"
+                        />
                     </RadioGroup>
                 </RelativeLayout>
 
                 <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
-                    android:weightSum="2">
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:weightSum="2">
 
                     <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
 
                         <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/noise_meter_label"
-                            android:layout_gravity="center_vertical"
-                            android:layout_marginBottom="2dp"
-                            />
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/noise_meter_label"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginBottom="2dp"
+                        />
 
                         <EditText
-                            android:id="@+id/noise_txt"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:background="@drawable/rounded_rectangle"
-                            android:layout_marginRight="5dp"
-                            android:layout_marginEnd="5dp"
-                            android:singleLine="true"
-                            android:padding="5dp"
-                            android:clickable="false"
-                            android:cursorVisible="false"
-                            android:focusable="false"
-                            android:focusableInTouchMode="false"
-
-                            />
-                    </LinearLayout>
-
-                    <Space
-                        android:layout_width="10dp"
-                        android:layout_height="1dp" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/noise_meter_label"
-                            android:layout_gravity="center_vertical"
-                            android:layout_marginBottom="2dp"
-                            />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="fill_parent">
-
-                            <ProgressBar
-                                android:id="@+id/noise_prb"
+                                android:id="@+id/noise_txt"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                style="@android:style/Widget.ProgressBar.Horizontal"
-                                />
+                                android:background="@drawable/rounded_rectangle"
+                                android:layout_marginRight="5dp"
+                                android:layout_marginEnd="5dp"
+                                android:singleLine="true"
+                                android:padding="5dp"
+                                android:clickable="false"
+                                android:cursorVisible="false"
+                                android:focusable="false"
+                                android:focusableInTouchMode="false"
+
+                        />
+                    </LinearLayout>
+
+                    <Space
+                            android:layout_width="10dp"
+                            android:layout_height="1dp" />
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                        <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/noise_meter_label"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginBottom="2dp"
+                        />
+
+                        <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="fill_parent">
+
+                            <ProgressBar
+                                    android:id="@+id/noise_prb"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_vertical"
+                                    style="@android:style/Widget.ProgressBar.Horizontal"
+                            />
 
                         </LinearLayout>
                     </LinearLayout>

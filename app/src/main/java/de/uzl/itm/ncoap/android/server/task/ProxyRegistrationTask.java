@@ -7,8 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 
 import de.uzl.itm.ncoap.android.server.MainActivity;
-import de.uzl.itm.ncoap.application.peer.CoapPeerApplication;
-import de.uzl.itm.ncoap.communication.dispatching.client.ClientCallback;
+import de.uzl.itm.ncoap.application.client.ClientCallback;
 import de.uzl.itm.ncoap.message.CoapRequest;
 import de.uzl.itm.ncoap.message.CoapResponse;
 import de.uzl.itm.ncoap.message.MessageCode;
@@ -30,9 +29,8 @@ public class ProxyRegistrationTask extends AsyncTask<String, Void, Void>{
     protected Void doInBackground(String... params) {
         try {
             URI registrationUri = new URI("coap", null, params[0], 5683, "/registry", null, null);
-            CoapRequest request = new CoapRequest(MessageType.Name.CON, MessageCode.Name.POST, registrationUri);
-
-            mainActivity.getCoapApplication().sendCoapRequest(request, new ClientCallback() {
+            CoapRequest request = new CoapRequest(MessageType.CON, MessageCode.POST, registrationUri);
+            mainActivity.getCoapEndpoint().sendCoapRequest(request, new ClientCallback() {
 
                 @Override
                 public void processCoapResponse(CoapResponse coapResponse) {

@@ -3,19 +3,23 @@ package de.uzl.itm.ncoap.android.server.resource;
 import com.google.common.util.concurrent.SettableFuture;
 
 import java.net.InetSocketAddress;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
-import de.uzl.itm.ncoap.application.server.webresource.ObservableWebresource;
-import de.uzl.itm.ncoap.application.server.webresource.WrappedResourceStatus;
+import de.uzl.itm.ncoap.application.linkformat.LinkParam;
+import de.uzl.itm.ncoap.application.server.resource.ObservableWebresource;
+import de.uzl.itm.ncoap.application.server.resource.WrappedResourceStatus;
 import de.uzl.itm.ncoap.message.CoapMessage;
 import de.uzl.itm.ncoap.message.CoapRequest;
 import de.uzl.itm.ncoap.message.CoapResponse;
 import de.uzl.itm.ncoap.message.MessageCode;
 import de.uzl.itm.ncoap.message.options.ContentFormat;
+
+import static de.uzl.itm.ncoap.message.options.ContentFormat.APP_RDF_XML;
+import static de.uzl.itm.ncoap.message.options.ContentFormat.APP_TURTLE;
+import static de.uzl.itm.ncoap.message.options.ContentFormat.TEXT_PLAIN_UTF8;
 
 /**
  * Created by olli on 18.05.15.
@@ -25,10 +29,10 @@ public abstract class SensorResource<V, T extends SensorValue<V>> extends Observ
     public static final long DEFAULT_CONTENT_FORMAT = ContentFormat.TEXT_PLAIN_UTF8;
 
     public static final String SENSORS_ONTOLOGY_NAMESPACE =
-            "http://media.itm.uni-luebeck.de/people/kleine/rdf/smartphones#";
+            "http://example.org/";
 
     public static final String SENSORS_ONTOLOGY_ABBREVIATION =
-            "smp";
+            "exp";
 
 
     private static String PLAIN_TEXT_TEMPLATE =
@@ -71,6 +75,9 @@ public abstract class SensorResource<V, T extends SensorValue<V>> extends Observ
 
     protected SensorResource(String uriPath, T initialStatus, ScheduledExecutorService executor) {
         super(uriPath, initialStatus, executor);
+
+        String contentTypes = "\"" + TEXT_PLAIN_UTF8 + " " + APP_RDF_XML + " " + APP_TURTLE + "\"";
+        this.setLinkParam(LinkParam.createLinkParam(LinkParam.Key.CT,  contentTypes));
     }
 
     /**
@@ -81,11 +88,6 @@ public abstract class SensorResource<V, T extends SensorValue<V>> extends Observ
 
     public abstract String getRDFSensorType();
 
-//    /**
-//     * The RDF name of the sensor resource (either a URI or a blank node, e.g. "_:mysensor")
-//     * @return the RDF name of the sensor resource (either a URI or a blank node, e.g. "_:mysensor")
-//     */
-//    public abstract String getRDFSensorName();
 
     /**
      * The URI of the observed property
@@ -93,6 +95,10 @@ public abstract class SensorResource<V, T extends SensorValue<V>> extends Observ
      */
     public abstract String getRDFObservedProperty();
 
+    @Override
+    public boolean isUpdateNotificationConfirmable(InetSocketAddress remoteEndpoint) {
+        return true;
+    }
 
     @Override
     public byte[] getEtag(long contentFormat){
@@ -107,17 +113,18 @@ public abstract class SensorResource<V, T extends SensorValue<V>> extends Observ
     @Override
     public byte[] getSerializedResourceStatus(long contentFormat) {
 
-        double lat = getStatus().getLatitude();
-        double lon = getStatus().getLongitude();
-        V plainValue = getStatus().getValue();
+        SensorValue sensorValue = this.getResourceStatus();
+        double lat = sensorValue.getLatitude();
+        double lon = sensorValue.getLongitude();
+        V plainValue = (V) sensorValue.getValue();
 
-        if(contentFormat == ContentFormat.APP_TURTLE || contentFormat == ContentFormat.APP_N3){
-            String xsdType = getStatus().getXsdType() == null ? "" : getStatus().getXsdType();
+        if (contentFormat == ContentFormat.APP_TURTLE || contentFormat == ContentFormat.APP_N3){
+            String xsdType = sensorValue.getXsdType() == null ? "" : sensorValue.getXsdType();
             String typedValue = "\"" + plainValue + "\"^^" + xsdType;
             String observedProperty = getRDFObservedProperty();
             String sensorType = getRDFSensorType();
 
-            String turtle = getStatus().getXsdType() == null ? "" : TURTLE_XSD_PREFIX;
+            String turtle = sensorValue.getXsdType() == null ? "" : TURTLE_XSD_PREFIX;
             turtle += String.format(Locale.ENGLISH, TURTLE_TEMPLATE, sensorType, observedProperty,
                     typedValue) + "\n\n";
 
@@ -140,7 +147,9 @@ public abstract class SensorResource<V, T extends SensorValue<V>> extends Observ
 
 
     @Override
-    public void processCoapRequest(SettableFuture<CoapResponse> responseFuture, CoapRequest coapRequest, InetSocketAddress remoteEndpoint) throws Exception {
+    public void processCoapRequest(SettableFuture<CoapResponse> responseFuture, CoapRequest coapRequest,
+           InetSocketAddress remoteEndpoint) throws Exception {
+
         Set<Long> acceptedFormats = coapRequest.getAcceptedContentFormats();
 
         //If accept option is not set in the request, use the default (TEXT_PLAIN_UTF8)
@@ -165,7 +174,7 @@ public abstract class SensorResource<V, T extends SensorValue<V>> extends Observ
         //requests accept option(s)) is offered by the Webservice then set payload and content format option
         //accordingly
         if(resourceStatus != null){
-            coapResponse = new CoapResponse(coapRequest.getMessageTypeName(), MessageCode.Name.CONTENT_205);
+            coapResponse = new CoapResponse(coapRequest.getMessageType(), MessageCode.CONTENT_205);
             coapResponse.setContent(resourceStatus.getContent(), contentFormat);
 
             coapResponse.setEtag(resourceStatus.getEtag());
@@ -179,7 +188,7 @@ public abstract class SensorResource<V, T extends SensorValue<V>> extends Observ
         //requests accept option(s)) is offered by the Webservice then set the code of the response to
         //400 BAD REQUEST and set a payload with a proper explanation
         else{
-            coapResponse = new CoapResponse(coapRequest.getMessageTypeName(), MessageCode.Name.NOT_ACCEPTABLE_406);
+            coapResponse = new CoapResponse(coapRequest.getMessageType(), MessageCode.NOT_ACCEPTABLE_406);
 
             StringBuilder payload = new StringBuilder();
             payload.append("Requested content format(s) (from requests ACCEPT option) not available: ");

@@ -1,6 +1,7 @@
 package de.uzl.itm.ncoap.android.server;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -16,40 +17,34 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.EditText;
-import android.widget.ProgressBar;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import java.net.InetSocketAddress;
-
+import android.widget.*;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import de.uzl.itm.ncoap.android.server.dialog.SettingsDialog;
 import de.uzl.itm.ncoap.android.server.dialog.StartRegistrationDialog;
-import de.uzl.itm.ncoap.android.server.resource.AmbientBrightnessSensorResource;
-import de.uzl.itm.ncoap.android.server.resource.AmbientBrightnessSensorValue;
-import de.uzl.itm.ncoap.android.server.resource.LocationResource;
-import de.uzl.itm.ncoap.android.server.resource.LocationValue;
-import de.uzl.itm.ncoap.android.server.resource.AmbientNoiseSensorResource;
-import de.uzl.itm.ncoap.android.server.resource.AmbientNoiseSensorValue;
-import de.uzl.itm.ncoap.android.server.resource.AmbientPressureSensorResource;
-import de.uzl.itm.ncoap.android.server.resource.AmbientPressureSensorValue;
+import de.uzl.itm.ncoap.android.server.resource.*;
 import de.uzl.itm.ncoap.android.server.task.AddressResolutionTask;
 import de.uzl.itm.ncoap.android.server.task.AudioSamplingTask;
 import de.uzl.itm.ncoap.android.server.task.ConnectivityChangeTask;
 import de.uzl.itm.ncoap.android.server.task.ProxyRegistrationTask;
-import de.uzl.itm.ncoap.application.peer.CoapPeerApplication;
+import de.uzl.itm.ncoap.application.endpoint.CoapEndpoint;
 import de.uzl.itm.ncoap.communication.dispatching.server.NotFoundHandler;
 
+import java.net.InetSocketAddress;
 
-public class MainActivity extends Activity implements RadioGroup.OnCheckedChangeListener,
-        SettingsDialog.Listener, StartRegistrationDialog.Listener{
+
+public class MainActivity extends AppCompatActivity implements RadioGroup.OnCheckedChangeListener,
+        SettingsDialog.Listener, StartRegistrationDialog.Listener {
 
     private Handler handler = new Handler();
 
@@ -98,7 +93,7 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
     private EditText txtPressure;
     private ProgressBar prbPressure;
 
-    private CoapPeerApplication coapApplication;
+    private CoapEndpoint coapEndpoint;
     private AmbientBrightnessSensorResource lightSensorService;
     private LocationResource locationResource;
     private AmbientNoiseSensorResource ambientNoiseSensorResource;
@@ -109,7 +104,13 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main_for_screenshot);
+
+        //Initialize the action bar
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setLogo(R.drawable.spitfire_logo);
+        toolbar.setSubtitle(R.string.app_subtitle);
+        setSupportActionBar(toolbar);
 
         //set view elements
         this.radGroupServer = (RadioGroup) findViewById(R.id.radgroup_server);
@@ -161,7 +162,7 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
 
 
         //Noise sampling
-        this.bufferSize = AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT);
+        this.bufferSize = AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 
         //Register for RadioGroup "Location"
         this.radGroupLocation.setOnCheckedChangeListener(this);
@@ -194,7 +195,7 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.ssp_settings) {
-            if(this.settingsDialog == null){
+            if (this.settingsDialog == null) {
                 this.settingsDialog = new SettingsDialog();
             }
 
@@ -202,7 +203,7 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
             return true;
         }
 
-        if(id == R.id.ssp_registration){
+        if (id == R.id.ssp_registration) {
             new StartRegistrationDialog().show(getFragmentManager(), null);
         }
 
@@ -211,7 +212,7 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
 
 
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         super.onDestroy();
         unregisterReceiver(networkStateReceiver);
     }
@@ -219,66 +220,98 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
     @Override
     public void onCheckedChanged(RadioGroup group, int checkedId) {
         //Server
-        if(group.getId() == R.id.radgroup_server){
-            if(checkedId == R.id.rad_server_on){
-                this.coapApplication = new CoapPeerApplication(NotFoundHandler.getDefault(), new InetSocketAddress(5683));
-            }
-            else{
-                this.coapApplication.shutdown();
-                this.coapApplication = null;
+        if (group.getId() == R.id.radgroup_server) {
+            if (checkedId == R.id.rad_server_on) {
+                this.coapEndpoint = new CoapEndpoint(
+                        "Phone CoAP", NotFoundHandler.getDefault(), new InetSocketAddress(5683)
+                );
+            } else {
+                final ProgressDialog progressDialog = new ProgressDialog(this);
+                progressDialog.setMessage("Shutdown Server...");
+                progressDialog.show();
+                AsyncTask.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        ListenableFuture shutdownFuture = coapEndpoint.shutdown();
+                        Futures.addCallback(shutdownFuture, new FutureCallback() {
+                            @Override
+                            public void onSuccess(Object result) {
+                                coapEndpoint = null;
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        progressDialog.dismiss();
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onFailure(Throwable t) {
+                                onSuccess(null);
+                            }
+                        }, MoreExecutors.sameThreadExecutor());
+                    }
+                });
 
                 //Disable Light Service
-                if(!this.radLightOff.isChecked()) {
+                if (!this.radLightOff.isChecked()) {
                     this.radLightOff.setChecked(true);
                 }
 
                 //Disable Location Service
-                if(!this.radLocationOff.isChecked()){
+                if (!this.radLocationOff.isChecked()) {
                     this.radLocationOff.setChecked(true);
                 }
 
                 //Disable Noise Service
-                if(!this.radNoiseOff.isChecked()){
+                if (!this.radNoiseOff.isChecked()) {
                     this.radNoiseOff.setChecked(true);
                 }
 
                 //Disable Pressure Service
-                if(!this.radPressureOff.isChecked()){
+                if (!this.radPressureOff.isChecked()) {
                     this.radPressureOff.setChecked(true);
                 }
             }
         }
 
         //Location
-        else if(group.getId() == R.id.radgroup_gps){
-            if(checkedId == R.id.rad_gps_on){
-                this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0,
-                        this.locationListener);
+        else if (group.getId() == R.id.radgroup_gps) {
+            if (checkedId == R.id.rad_gps_on) {
+                try {
+                    this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0,
+                            this.locationListener);
 
-                //Create Location Web Service
-                if(this.coapApplication != null) {
-                    LocationValue initialStatus = new LocationValue(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, null);
-                    this.locationResource = new LocationResource("/location", initialStatus, coapApplication.getExecutor());
-                    this.coapApplication.registerResource(this.locationResource);
+                    //Create Location Web Service
+                    if (this.coapEndpoint != null) {
+                        LocationValue initialStatus = new LocationValue(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, null);
+                        this.locationResource = new LocationResource("/location", initialStatus, coapEndpoint.getExecutor());
+                        this.coapEndpoint.registerWebresource(this.locationResource);
+                    } else {
+                        this.radLocationOff.setChecked(true);
+                        Toast.makeText(this, "Server is not running!", Toast.LENGTH_LONG).show();
+                    }
+                } catch (SecurityException ex) {
+                    // TODO
                 }
-                else{
-                    this.radLocationOff.setChecked(true);
-                    Toast.makeText(this, "Server is not running!", Toast.LENGTH_LONG).show();
-                }
-            }
-            else{
-                this.locationManager.removeUpdates(this.locationListener);
-                this.txtLatitude.setText("");
-                this.txtLongitude.setText("");
+            } else {
+                try {
+                    this.locationManager.removeUpdates(this.locationListener);
+                    this.txtLatitude.setText("");
+                    this.txtLongitude.setText("");
 
-                if(this.locationResource != null) {
-                    this.locationResource.shutdown();
-                    this.locationResource = null;
+                    if (this.locationResource != null) {
+                        this.coapEndpoint.shutdownWebresource(this.locationResource.getUriPath());
+                        this.locationResource = null;
+                    }
+                } catch (SecurityException ex) {
+                    // TODO
                 }
             }
         }
+
         //Noise
-        else if(group.getId() == R.id.radgroup_noise) {
+        else if (group.getId() == R.id.radgroup_noise) {
             if (checkedId == R.id.rad_noise_on) {
                 this.audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate,
                         AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
@@ -287,21 +320,27 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
                 this.handler.post(this.samplingTask);
 
                 //Register Web Service
-                if(this.coapApplication != null) {
-                    AmbientNoiseSensorValue initialStatus = new AmbientNoiseSensorValue(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Integer.MIN_VALUE);
-                    this.ambientNoiseSensorResource = new AmbientNoiseSensorResource("/noise", initialStatus, coapApplication.getExecutor());
-                    this.coapApplication.registerResource(this.ambientNoiseSensorResource);
-                }
-                else{
+                if (this.coapEndpoint != null) {
+                    AmbientNoiseSensorValue initialStatus = new AmbientNoiseSensorValue(
+                            Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Integer.MIN_VALUE);
+                    this.ambientNoiseSensorResource = new AmbientNoiseSensorResource(
+                            "/noise", initialStatus, coapEndpoint.getExecutor());
+                    this.coapEndpoint.registerWebresource(this.ambientNoiseSensorResource);
+                } else {
                     this.radNoiseOff.setChecked(true);
                     Toast.makeText(this, "Server is not running!", Toast.LENGTH_LONG).show();
                 }
-
             } else {
                 if (this.audioRecord != null) {
                     this.audioRecord.release();
                     this.audioRecord = null;
                     this.handler.removeCallbacks(samplingTask);
+
+                    if (this.ambientNoiseSensorResource != null) {
+                        this.coapEndpoint.shutdownWebresource(this.ambientNoiseSensorResource.getUriPath());
+                        this.ambientNoiseSensorResource = null;
+                    }
+
                 }
                 txtNoise.setText("");
                 prbNoise.setProgress(0);
@@ -320,13 +359,19 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
                 else {
                     //create light sensor listener and register at sensor manager
                     this.lightSensorListener = new LightSensorEventListener();
-                    this.sensorManager.registerListener(this.lightSensorListener, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
+                    this.sensorManager.registerListener(
+                            this.lightSensorListener, lightSensor, SensorManager.SENSOR_DELAY_NORMAL
+                    );
 
                     //Create Light Web Service
-                    if (this.coapApplication != null) {
-                        AmbientBrightnessSensorValue initialStatus = new AmbientBrightnessSensorValue(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
-                        this.lightSensorService = new AmbientBrightnessSensorResource("/light", initialStatus, coapApplication.getExecutor());
-                        this.coapApplication.registerResource(this.lightSensorService);
+                    if (this.coapEndpoint != null) {
+                        AmbientBrightnessSensorValue initialStatus = new AmbientBrightnessSensorValue(
+                                Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY
+                        );
+                        this.lightSensorService = new AmbientBrightnessSensorResource(
+                                "/light", initialStatus, coapEndpoint.getExecutor()
+                        );
+                        this.coapEndpoint.registerWebresource(this.lightSensorService);
                     } else {
                         this.radLightOff.setChecked(true);
                         Toast.makeText(this, "Server is not running!", Toast.LENGTH_LONG).show();
@@ -338,7 +383,7 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
                 this.txtLight.setText("");
                 this.prbLight.setProgress(0);
                 if(this.lightSensorService != null) {
-                    this.lightSensorService.shutdown();
+                    this.coapEndpoint.shutdownWebresource(this.lightSensorService.getUriPath());
                     this.lightSensorService = null;
                 }
             }
@@ -358,11 +403,15 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
                     this.pressureSensorListener = new PressureSensorEventListener();
                     this.sensorManager.registerListener(this.pressureSensorListener, pressureSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
-                    //Create Pressure Web Service
-                    if (this.coapApplication != null) {
-                        AmbientPressureSensorValue initialStatus = new AmbientPressureSensorValue(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
-                        this.pressureSensorService = new AmbientPressureSensorResource("/pressure", initialStatus, coapApplication.getExecutor());
-                        this.coapApplication.registerResource(this.pressureSensorService);
+                    //Create Pressure Web Resource
+                    if (this.coapEndpoint != null) {
+                        AmbientPressureSensorValue initialStatus = new AmbientPressureSensorValue(
+                                Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY
+                        );
+                        this.pressureSensorService = new AmbientPressureSensorResource(
+                                "/pressure", initialStatus, coapEndpoint.getExecutor()
+                        );
+                        this.coapEndpoint.registerWebresource(this.pressureSensorService);
                     } else {
                         this.radPressureOff.setChecked(true);
                         Toast.makeText(this, "Server is not running!", Toast.LENGTH_LONG).show();
@@ -375,7 +424,7 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
                 this.prbPressure.setProgress(0);
 
                 if(this.pressureSensorService != null) {
-                    this.pressureSensorService.shutdown();
+                    this.coapEndpoint.shutdownWebresource(this.pressureSensorService.getUriPath());
                     this.pressureSensorService = null;
                 }
             }
@@ -419,8 +468,8 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
         ambientNoiseSensorResource.setNoiseValue(new AmbientNoiseSensorValue(latitude, longitude, noiseLevel));
     }
 
-    public CoapPeerApplication getCoapApplication(){
-        return this.coapApplication;
+    public CoapEndpoint getCoapEndpoint(){
+        return this.coapEndpoint;
     }
 
     @Override
@@ -446,7 +495,7 @@ public class MainActivity extends Activity implements RadioGroup.OnCheckedChange
             txtLongitude.setText("" + location.getLongitude());
 
             if(locationResource != null) {
-                locationResource.setResourceStatus(new LocationValue(latitude, longitude, null), 5);
+                locationResource.setResourceStatus(new LocationValue(latitude, longitude, null), 10);
             }
         }
 

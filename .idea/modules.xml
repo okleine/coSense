@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/ncoap-android-server.iml" filepath="$PROJECT_DIR$/ncoap-android-server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/cosense.iml" filepath="$PROJECT_DIR$/cosense.iml" />
     </modules>
   </component>
 </project>

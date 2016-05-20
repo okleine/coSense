@@ -1,11 +1,9 @@
 package de.uzl.itm.ncoap.android.server.resource;
 
 import java.net.InetSocketAddress;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.ScheduledExecutorService;
 
-import de.uzl.itm.ncoap.communication.dispatching.client.Token;
 import de.uzl.itm.ncoap.message.CoapMessage;
 import de.uzl.itm.ncoap.message.options.ContentFormat;
 
@@ -16,8 +14,6 @@ import de.uzl.itm.ncoap.message.options.ContentFormat;
 public class LocationResource extends SensorResource<Void, LocationValue> {
 
     private static String TAG = LocationResource.class.getSimpleName();
-
-    //private static HashMap<Long, String> CONTENT_TEMPLATES = new HashMap<>();
 
     private static String PLAIN_TEXT_TEMPLATE =
             "Current position is at latitude \"%.10f\" and longitude \"%.10f\".";
@@ -86,8 +82,8 @@ public class LocationResource extends SensorResource<Void, LocationValue> {
     }
 
     @Override
-    public boolean isUpdateNotificationConfirmable(InetSocketAddress remoteEndpoint, Token token) {
-        return false;
+    public boolean isUpdateNotificationConfirmable(InetSocketAddress remoteEndpoint) {
+        return true;
     }
 
     @Override
@@ -104,8 +100,8 @@ public class LocationResource extends SensorResource<Void, LocationValue> {
     @Override
     public byte[] getSerializedResourceStatus(long contentFormat) {
 
-        double lat = getStatus().getLatitude();
-        double lon = getStatus().getLongitude();
+        double lat = this.getResourceStatus().getLatitude();
+        double lon = this.getResourceStatus().getLongitude();
 
         if(contentFormat == ContentFormat.APP_TURTLE || contentFormat == ContentFormat.APP_N3){
 
