@@ -36,7 +36,7 @@ public abstract class SensorResource<V, T extends SensorValue<V>> extends Observ
 
 
     private static String PLAIN_TEXT_TEMPLATE =
-            "Value of \"%s\" at latitude %.10f and longitude %.10f is %d .";
+            "Value of \"%s\" at latitude %.10f and longitude %.10f is %f .";
 
 
     private static String TURTLE_XSD_PREFIX =
@@ -201,5 +201,10 @@ public abstract class SensorResource<V, T extends SensorValue<V>> extends Observ
 
         //Set the response future with the previously generated CoAP response
         responseFuture.set(coapResponse);
+    }
+
+    @Override
+    public void removeObserver(InetSocketAddress remoteAddress) {
+        // nothing to do ...
     }
 }

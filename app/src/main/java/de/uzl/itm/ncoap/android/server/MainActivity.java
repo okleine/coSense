@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_for_screenshot);
+        setContentView(R.layout.activity_main);
 
         //Initialize the action bar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);

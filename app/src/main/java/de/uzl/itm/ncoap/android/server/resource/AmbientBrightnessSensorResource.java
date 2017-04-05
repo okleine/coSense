@@ -2,6 +2,7 @@ package de.uzl.itm.ncoap.android.server.resource;
 
 import android.util.Log;
 
+import java.net.InetSocketAddress;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
